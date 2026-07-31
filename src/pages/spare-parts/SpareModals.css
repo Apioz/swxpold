@@ -1,0 +1,151 @@
+/* 备件模块弹窗统一样式 */
+
+.spare-modal .ant-modal-content {
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.spare-modal .ant-modal-header {
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.spare-modal .ant-modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.spare-modal .ant-modal-close {
+  top: 16px;
+}
+
+.spare-modal .ant-modal-body {
+  padding: 20px 24px;
+  max-height: min(68vh, 640px);
+  overflow-y: auto;
+}
+
+.spare-modal .ant-modal-footer {
+  margin: 0;
+  padding: 12px 24px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.spare-modal-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.spare-modal-form .ant-form-item-label > label {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.spare-modal-form .ant-input,
+.spare-modal-form .ant-input-number,
+.spare-modal-form .ant-select-selector,
+.spare-modal-form .ant-picker,
+.spare-modal-form .ant-input-affix-wrapper,
+.spare-modal-form .ant-select-auto-complete .ant-input {
+  border-radius: 6px;
+}
+
+.spare-modal-form .ant-input-number {
+  width: 100%;
+}
+
+.spare-modal-form .ant-picker {
+  width: 100%;
+}
+
+.spare-modal-section {
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.spare-modal-section + .spare-modal-section {
+  margin-top: 16px;
+}
+
+.spare-modal-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.spare-modal-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+  line-height: 1;
+}
+
+.spare-modal-section-title::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: #1890ff;
+  flex-shrink: 0;
+}
+
+.spare-modal-required {
+  color: #ff4d4f;
+  font-family: SimSun, sans-serif;
+  margin-right: 2px;
+}
+
+.spare-modal-section .ant-table-wrapper {
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.spare-modal-section .ant-table {
+  background: #fff;
+}
+
+.spare-modal-section .ant-table-thead > tr > th {
+  background: #f5f7fa !important;
+  font-weight: 500;
+}
+
+.spare-modal-upload .ant-upload.ant-upload-select {
+  width: 96px !important;
+  height: 96px !important;
+  margin: 0 !important;
+  border-radius: 6px !important;
+}
+
+.spare-modal-code-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  line-height: 22px;
+  width: 100%;
+}
+
+.spare-modal-select .ant-modal-body {
+  padding: 16px 24px 8px;
+}
+
+.spare-modal-select .ant-table-wrapper {
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
+}

@@ -1,0 +1,77 @@
+import type { FacilityIADevice } from '../types/facility';
+
+/** 设施管理中台 - 设备中心 mock 数据（含非 IA 设备用于筛选验证） */
+export const mockFacilityDevices: FacilityIADevice[] = [
+  {
+    id: 'fd1',
+    iaDeviceCode: 'IA-MON-001',
+    iaDeviceName: '5Z-019-7、8号楼中庭监控',
+    integrationCategory: '监控设备',
+    eventDevice: '监控',
+    protocolManufacturer: '海康威视',
+    portNumber: '14',
+    location: '7、8号楼中庭',
+  },
+  {
+    id: 'fd2',
+    iaDeviceCode: 'IA-ACC-002',
+    iaDeviceName: '1号楼门禁控制器',
+    integrationCategory: '门禁设备',
+    eventDevice: '门禁',
+    protocolManufacturer: '海康威视',
+    portNumber: '8000',
+    location: '1号楼大厅',
+  },
+  {
+    id: 'fd3',
+    iaDeviceCode: 'IA-ENV-003',
+    iaDeviceName: '生物芯片机房动环主机',
+    integrationCategory: '动环设备',
+    eventDevice: '动环设备',
+    protocolManufacturer: '华为',
+    portNumber: '502',
+    location: '数据中心机房',
+  },
+  {
+    id: 'fd4',
+    iaDeviceCode: 'IA-GATE-004',
+    iaDeviceName: '南门道闸',
+    integrationCategory: '道闸设备',
+    eventDevice: '道闸设备',
+    protocolManufacturer: '海康威视',
+    location: '南门入口',
+  },
+  {
+    id: 'fd5',
+    iaDeviceCode: 'IA-TEMP-005',
+    iaDeviceName: '1F101温湿度传感器',
+    integrationCategory: '温湿度传感器',
+    eventDevice: '温湿度传感器',
+    location: '1号楼1F101',
+  },
+  {
+    id: 'fd6',
+    iaDeviceCode: 'IA-PLC-006',
+    iaDeviceName: '暖通PLC控制器',
+    integrationCategory: 'PLC',
+    eventDevice: 'PLC',
+    location: '暖通机房',
+  },
+  // 非 IA 设备：缺少 IA_设备编号 / IA_设备名称，不应出现在推送配置
+  {
+    id: 'fd-x1',
+    iaDeviceCode: '',
+    iaDeviceName: '未接入IA的普通设备',
+    integrationCategory: '监控设备',
+    eventDevice: '监控',
+    location: '测试区',
+  },
+  {
+    id: 'fd-x2',
+    iaDeviceCode: 'IA-NO-NAME',
+    iaDeviceName: '',
+    integrationCategory: '门禁设备',
+    eventDevice: '门禁',
+    location: '测试区',
+  },
+];

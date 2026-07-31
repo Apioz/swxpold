@@ -1,0 +1,53 @@
+.spare-ledger-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-bar {
+  background: #fff;
+  padding: 16px 16px 4px;
+  border-radius: 4px;
+}
+
+.search-form {
+  row-gap: 12px;
+}
+
+.search-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.table-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.table-utils {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 16px;
+}
+
+.table-utils .anticon {
+  cursor: pointer;
+}
+
+.table-utils .anticon:hover {
+  color: #1890ff;
+}
+
+.link-danger {
+  color: #ff4d4f !important;
+}
+
+.link-danger:hover {
+  color: #ff7875 !important;
+}
