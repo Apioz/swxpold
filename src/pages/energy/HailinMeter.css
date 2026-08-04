@@ -1,0 +1,620 @@
+.hailin-meter-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hailin-meter-page .ant-tabs-nav {
+  margin-bottom: 0;
+  background: #fff;
+  padding: 0 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.hailin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  border: 1px solid #f0f0f0;
+}
+
+.hailin-page-header-left h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.hailin-page-header-left p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.hailin-stat-pills {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.hailin-stat-pills strong {
+  font-size: 18px;
+  margin-left: 4px;
+}
+
+.hailin-stat-pills .online strong { color: #52c41a; }
+.hailin-stat-pills .offline strong { color: #ff4d4f; }
+
+.hailin-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.hailin-search-bar {
+  background: #fff;
+  padding: 16px 16px 4px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.hailin-search-form {
+  row-gap: 12px;
+}
+
+.hailin-search-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.hailin-table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hailin-table-utils {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 16px;
+}
+
+.hailin-table-utils .anticon {
+  cursor: pointer;
+}
+
+.hailin-table-utils .anticon:hover {
+  color: #1890ff;
+}
+
+.hailin-row-offline {
+  background: #fff1f0 !important;
+}
+
+.hailin-row-offline:hover > td {
+  background: #ffe7e6 !important;
+}
+
+.hailin-code-link {
+  color: #1890ff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.hailin-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.hailin-status-dot.online { background: #52c41a; }
+.hailin-status-dot.offline { background: #ff4d4f; }
+.hailin-status-dot.alarm { background: #faad14; }
+
+.hailin-cal-expired {
+  color: #ff4d4f;
+}
+
+/* 管网监控 */
+.hailin-monitor-layout {
+  display: flex;
+  gap: 12px;
+  min-height: 620px;
+}
+
+.hailin-monitor-tree {
+  width: 280px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hailin-monitor-tree-head {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+}
+
+.hailin-monitor-tree .ant-tree {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 12px 16px;
+}
+
+.hailin-monitor-center {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hailin-monitor-center-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hailin-diagram-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.hailin-diagram-legend .line {
+  display: inline-block;
+  width: 24px;
+  height: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.hailin-diagram-legend .line.main { background: #ff4d4f; }
+.hailin-diagram-legend .line.branch { background: #1890ff; }
+
+.hailin-diagram-wrap {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef3f9 100%);
+  margin: 12px;
+  border-radius: 8px;
+  border: 1px solid #d6e4ff;
+  overflow: hidden;
+}
+
+.hailin-diagram-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hailin-diagram-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 120px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.hailin-diagram-node:hover,
+.hailin-diagram-node.active {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+}
+
+.hailin-diagram-node.offline {
+  border-color: #ffccc7;
+  background: #fff7f6;
+}
+
+.hailin-diagram-node .node-code {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.hailin-diagram-node .node-label {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 6px;
+}
+
+.hailin-diagram-node .node-flow {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.5;
+}
+
+.hailin-monitor-detail {
+  width: 320px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.hailin-detail-head {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #e6f4ff 0%, #f0f5ff 100%);
+}
+
+.hailin-detail-head h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.hailin-detail-head p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.hailin-detail-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.hailin-detail-section h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.hailin-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #f5f5f5;
+}
+
+.hailin-info-row .label {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.hailin-metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.hailin-metric-card {
+  background: #fafafa;
+  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.hailin-metric-card .label {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 4px;
+}
+
+.hailin-metric-card .value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.hailin-metric-card .unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.45);
+  margin-left: 2px;
+}
+
+/* 数据分析 */
+.hailin-analysis-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hailin-analysis-table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.hailin-realtime-table .ant-table {
+  font-size: 12px;
+}
+
+.hailin-realtime-table .ant-table-thead > tr > th {
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.hailin-sensor-ok { color: #52c41a; }
+.hailin-sensor-err { color: #ff4d4f; }
+
+.hailin-empty-detail {
+  padding: 48px 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.hailin-network-page,
+.hailin-analysis-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hailin-network-page-header,
+.hailin-analysis-page-header {
+  margin-bottom: 0;
+}
+
+.hailin-monitor-tree-search {
+  padding: 8px 12px;
+}
+
+.hailin-tree-leaf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hailin-diagram-zoom {
+  margin-left: auto;
+}
+
+.hailin-zoom-label {
+  min-width: 42px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.hailin-diagram-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  transition: transform 0.2s ease;
+}
+
+.hailin-inlet-node {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translate(-50%, 0);
+  z-index: 2;
+  min-width: 88px;
+  padding: 6px 10px;
+  background: #fff1f0;
+  border: 2px solid #ff4d4f;
+  border-radius: 4px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.15);
+  pointer-events: none;
+}
+
+.hailin-inlet-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #cf1322;
+}
+
+.hailin-inlet-spec {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.hailin-diagram-node {
+  min-width: 108px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 2px solid #52c41a;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: left;
+}
+
+.hailin-diagram-node .node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.hailin-diagram-node .node-code {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1890ff;
+}
+
+.hailin-diagram-node .node-badge {
+  font-size: 10px;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.hailin-diagram-node .node-badge.online {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.hailin-diagram-node .node-badge.offline {
+  background: #f5f5f5;
+  color: #8c8c8c;
+  border: 1px solid #d9d9d9;
+}
+
+.hailin-diagram-node .node-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.hailin-diagram-node .node-status-text {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.45);
+  margin: 2px 0;
+}
+
+.hailin-diagram-node .node-flow {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.4;
+}
+
+.hailin-diagram-node.offline {
+  border-color: #bfbfbf;
+  background: #fafafa;
+  opacity: 0.92;
+}
+
+.hailin-diagram-node.active {
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.25);
+  border-color: #1890ff;
+}
+
+.hailin-flowmeter-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hailin-flowmeter-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #f0f5ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.hailin-metric-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.hailin-metric-card-bordered {
+  border: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.hailin-detail-update {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.hailin-detail-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.hailin-detail-modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #e6f4ff;
+  color: #1890ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.hailin-detail-modal-head h3 {
+  margin: 0 0 4px;
+}
+
+.hailin-detail-modal-head p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.hailin-monitor-center-head {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hailin-status-dot.alarm {
+  background: #faad14;
+}
+
+.hailin-diagram-legend .line.main {
+  background: #ff4d4f;
+}
+
+.hailin-diagram-legend .line.branch {
+  background: #1890ff;
+}
+
+.hailin-runtime-field-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 16px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.hailin-runtime-field-list-compact {
+  grid-template-columns: 1fr;
+  max-height: 360px;
+}
+
+.hailin-runtime-field-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #f0f0f0;
+  font-size: 12px;
+}
+
+.hailin-runtime-field-item .label {
+  color: rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+
+.hailin-runtime-field-item .value {
+  color: rgba(0, 0, 0, 0.85);
+  text-align: right;
+  word-break: break-all;
+}
+

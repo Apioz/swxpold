@@ -12,6 +12,16 @@ import NotificationMethodConfig from './pages/security/NotificationMethodConfig'
 import AlarmStatistics from './pages/security/AlarmStatistics';
 import AlarmEvents from './pages/security/AlarmEvents';
 import EventWorkbench from './pages/security/EventWorkbench';
+import FlowMeterManagement from './pages/innovation-center/FlowMeterManagement';
+import FloorPlanManagement from './pages/innovation-center/FloorPlanManagement';
+import FloorPlanViewer from './pages/innovation-center/FloorPlanViewer';
+import PlcHvacManagement from './pages/plc-hvac/PlcHvacManagement';
+import AccessPermissionConfig from './pages/access-control/AccessPermissionConfig';
+import AccessDeviceManagement from './pages/security/access-control/AccessDeviceManagement';
+import AccessRecognitionRecords from './pages/security/access-control/AccessRecognitionRecords';
+import HailinMeterLedger from './pages/energy/HailinMeterLedger';
+import HailinNetworkMonitor from './pages/energy/HailinNetworkMonitor';
+import HailinDataAnalysis from './pages/energy/HailinDataAnalysis';
 import './App.css';
 
 function App() {
@@ -87,6 +97,91 @@ function App() {
               path="security/alarms/workbench"
               element={<EventWorkbench />}
             />
+            <Route
+              path="security/access-control/permissions"
+              element={<AccessPermissionConfig />}
+            />
+            <Route
+              path="security/access-control/devices"
+              element={<AccessDeviceManagement />}
+            />
+            <Route
+              path="security/access-control/records"
+              element={<AccessRecognitionRecords />}
+            />
+            <Route
+              path="security/parking"
+              element={<PlaceholderPage title="停车管理" />}
+            />
+            <Route
+              path="security/monitoring"
+              element={<PlaceholderPage title="监控管理" />}
+            />
+            <Route
+              path="security/passage"
+              element={<PlaceholderPage title="通行管理" />}
+            />
+            <Route
+              path="security/iot"
+              element={<PlaceholderPage title="物联管理" />}
+            />
+            <Route
+              path="energy/reports"
+              element={<PlaceholderPage title="能源报表" />}
+            />
+            <Route
+              path="energy/statistics"
+              element={<PlaceholderPage title="能源统计" />}
+            />
+            <Route
+              path="energy/power-analysis"
+              element={<PlaceholderPage title="电能分析" />}
+            />
+            <Route
+              path="energy/power-devices"
+              element={<PlaceholderPage title="电能设备管理" />}
+            />
+            <Route
+              path="energy/types"
+              element={<PlaceholderPage title="能源类型管理" />}
+            />
+            <Route
+              path="energy/levels"
+              element={<PlaceholderPage title="能源层级管理" />}
+            />
+            <Route
+              path="energy/alarm-center"
+              element={<PlaceholderPage title="报警中心" />}
+            />
+            <Route
+              path="energy/hailin-meter"
+              element={<Navigate to="/energy/hailin-meter/devices" replace />}
+            />
+            <Route
+              path="energy/hailin-meter/devices"
+              element={<HailinMeterLedger />}
+            />
+            <Route
+              path="energy/hailin-meter/network"
+              element={<HailinNetworkMonitor />}
+            />
+            <Route
+              path="energy/hailin-meter/analysis"
+              element={<HailinDataAnalysis />}
+            />
+            <Route
+              path="innovation-center/flow-meters"
+              element={<FlowMeterManagement />}
+            />
+            <Route
+              path="innovation-center/floor-plans"
+              element={<FloorPlanManagement />}
+            />
+            <Route
+              path="innovation-center/floor-plans/:floorId"
+              element={<FloorPlanViewer />}
+            />
+            <Route path="plc-hvac/systems" element={<PlcHvacManagement />} />
             <Route
               path="process"
               element={<PlaceholderPage title="流程管理" />}

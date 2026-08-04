@@ -1,0 +1,136 @@
+.access-control-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.access-control-desc {
+  margin: 0;
+  padding: 10px 14px;
+  background: #e6f4ff;
+  border: 1px solid #91caff;
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.access-control-desc strong {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.access-search-bar {
+  background: #fff;
+  padding: 16px 16px 4px;
+  border-radius: 4px;
+}
+
+.access-search-form {
+  row-gap: 12px;
+}
+
+.access-search-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.access-table-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.access-table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.access-table-utils {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 16px;
+}
+
+.access-table-utils .anticon {
+  cursor: pointer;
+}
+
+.access-table-utils .anticon:hover {
+  color: #1890ff;
+}
+
+.access-group-expand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0 8px;
+}
+
+.access-group-expand-block h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.access-group-form {
+  margin-top: 8px;
+}
+
+.access-view-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.access-view-section h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.danger-link {
+  color: #ff4d4f;
+}
+
+.danger-link:hover {
+  color: #ff7875;
+}
+
+.access-person-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.access-person-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.access-person-list-head span:first-child {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.access-person-list-hint {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.access-person-list-table {
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+}
+
+.access-person-list-table .ant-table-thead > tr > th {
+  background: #fafafa;
+}

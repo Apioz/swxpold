@@ -1,0 +1,469 @@
+/* ========== 风系统运行弹窗 ========== */
+.hvac-runtime-modal .ant-modal-content {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.hvac-runtime-modal-body {
+  background: linear-gradient(180deg, #0d1b2a 0%, #1b2838 40%, #1a2332 100%);
+  color: #e8edf3;
+  padding: 0 !important;
+}
+
+.hvac-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hvac-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hvac-modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+}
+
+.hvac-modal-header h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.hvac-modal-header p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hvac-runtime-live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 系统指标 */
+.hvac-runtime-modal-body .hvac-system-metrics {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.hvac-runtime-modal-body .hvac-metric-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid #1890ff;
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+
+.hvac-runtime-modal-body .hvac-metric-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+}
+
+.hvac-runtime-modal-body .hvac-metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'Consolas', 'Monaco', monospace;
+  line-height: 1.2;
+}
+
+.hvac-runtime-modal-body .hvac-metric-unit {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+  margin-left: 2px;
+}
+
+/* 风系统示意图 */
+.hvac-schematic {
+  padding: 0 20px 20px;
+}
+
+.hvac-duct-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.hvac-duct-row.return {
+  margin-bottom: 0;
+  margin-top: 8px;
+}
+
+.hvac-duct-label {
+  width: 100px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.duct-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.duct-badge.supply {
+  background: #1890ff;
+  color: #fff;
+}
+
+.duct-badge.return {
+  background: #fa8c16;
+  color: #fff;
+}
+
+.hvac-duct-pipe {
+  flex: 1;
+  height: 36px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hvac-duct-pipe.supply {
+  background: linear-gradient(180deg, #1565c0 0%, #0d47a1 50%, #1565c0 100%);
+  border: 2px solid #42a5f5;
+  box-shadow: 0 0 12px rgba(24, 144, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.hvac-duct-pipe.return {
+  background: linear-gradient(180deg, #e65100 0%, #bf360c 50%, #e65100 100%);
+  border: 2px solid #ff9800;
+  box-shadow: 0 0 12px rgba(250, 140, 22, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.hvac-air-flow {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 20px,
+    rgba(255, 255, 255, 0.15) 20px,
+    rgba(255, 255, 255, 0.15) 40px
+  );
+  animation: airFlowMove 1.2s linear infinite;
+}
+
+.hvac-air-flow.return {
+  animation-direction: reverse;
+}
+
+.hvac-air-flow.stopped {
+  animation: none;
+  opacity: 0.2;
+}
+
+@keyframes airFlowMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(40px); }
+}
+
+.duct-reading {
+  position: relative;
+  z-index: 1;
+  font-family: 'Consolas', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.hvac-schematic-body {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: radial-gradient(ellipse at center, #1e3a5f 0%, #0d1b2a 70%);
+  overflow: hidden;
+  min-height: 380px;
+}
+
+.hvac-pipe-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hvac-diagram-map {
+  position: relative;
+  min-height: 380px;
+  z-index: 2;
+}
+
+/* 房间示意块 */
+.hvac-room-schematic {
+  position: absolute;
+  z-index: 3;
+}
+
+.hvac-room-schematic-inner {
+  height: 100%;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 2px solid rgba(100, 181, 246, 0.5);
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hvac-room-schematic:hover .hvac-room-schematic-inner {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.25);
+}
+
+.hvac-room-schematic.online .hvac-room-schematic-inner {
+  border-color: rgba(82, 196, 26, 0.7);
+}
+
+.hvac-room-schematic.offline .hvac-room-schematic-inner {
+  border-color: rgba(255, 255, 255, 0.15);
+  opacity: 0.6;
+}
+
+.hvac-room-schematic.alarm .hvac-room-schematic-inner {
+  border-color: #ff4d4f;
+  animation: hvac-alarm-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes hvac-alarm-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 77, 79, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 77, 79, 0.8); }
+}
+
+.hvac-room-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.hvac-room-schematic .hvac-room-no {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.hvac-room-schematic .hvac-room-name {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 2px 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hvac-room-gauges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.hvac-gauge-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  padding: 4px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gauge-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(24, 144, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #69b1ff;
+  flex-shrink: 0;
+}
+
+.gauge-mini {
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.gauge-data {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gauge-label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.2;
+}
+
+.gauge-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: #69b1ff;
+  font-family: 'Consolas', monospace;
+  line-height: 1.2;
+}
+
+.hvac-room-connector {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #42a5f5;
+  box-shadow: 0 0 6px rgba(66, 165, 245, 0.8);
+}
+
+.hvac-room-connector.top {
+  top: -5px;
+}
+
+.hvac-room-connector.bottom {
+  bottom: -5px;
+  background: #ff9800;
+  box-shadow: 0 0 6px rgba(255, 152, 0, 0.8);
+}
+
+/* AHU 机组 */
+.hvac-ahu-schematic {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 4;
+}
+
+.hvac-ahu-fan {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(24, 144, 255, 0.3) 0%, rgba(24, 144, 255, 0.05) 70%);
+  border: 3px solid #1890ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(24, 144, 255, 0.5);
+}
+
+.hvac-ahu-fan.spinning svg {
+  animation: fanSpin 2s linear infinite;
+}
+
+@keyframes fanSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.hvac-ahu-schematic.offline .hvac-ahu-fan {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  opacity: 0.5;
+}
+
+.hvac-ahu-info {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hvac-ahu-info strong {
+  font-size: 12px;
+  color: #fff;
+}
+
+.hvac-ahu-info span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hvac-ahu-info .ahu-freq {
+  color: #69b1ff;
+  font-family: 'Consolas', monospace;
+  font-weight: 700;
+}
+
+.hvac-runtime-empty {
+  padding: 48px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* modbus 保留 */
+.plc-modbus-card {
+  margin-top: 12px;
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.plc-modbus-ports {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.plc-modbus-port {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 11px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+@media (max-width: 900px) {
+  .hvac-runtime-modal-body .hvac-system-metrics {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

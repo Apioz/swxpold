@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Tabs } from 'antd';
 import type { MenuProps } from 'antd';
 import {
+  ExperimentOutlined,
   AppstoreOutlined,
   CalendarOutlined,
   CustomerServiceOutlined,
@@ -14,10 +15,12 @@ import {
   ProjectOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
+  ThunderboltOutlined,
   ToolOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import './MainLayout.css';
+import { getEnergyOpenKeys, energyMenuChildren, energyRouteTitleMap } from '../config/energyMenu';
 
 const { Sider, Header, Content } = Layout;
 
@@ -40,6 +43,17 @@ const routeTitleMap: Record<string, string> = {
   '/security/alarms/statistics': '报警统计',
   '/security/alarms/events': '报警事件',
   '/security/alarms/workbench': '事件工作台',
+  '/security/parking': '停车管理',
+  '/security/monitoring': '监控管理',
+  '/security/access-control/devices': '门禁设备管理',
+  '/security/access-control/records': '门禁识别记录',
+  '/security/access-control/permissions': '门禁权限配置',
+  '/security/passage': '通行管理',
+  '/security/iot': '物联管理',
+  ...energyRouteTitleMap,
+  '/innovation-center/flow-meters': '流量计设备管理',
+  '/innovation-center/floor-plans': '二维图纸管理',
+  '/plc-hvac/systems': 'PLC风系统管理',
   '/process': '流程管理',
   '/mobile': '移动端管理',
   '/customer': '客户管理',
@@ -88,8 +102,37 @@ const menuItems: MenuItem[] = [
           { key: '/security/alarms/workbench', label: '事件工作台' },
         ],
       },
+      { key: '/security/parking', label: '停车管理' },
+      { key: '/security/monitoring', label: '监控管理' },
+      {
+        key: 'security-access',
+        label: '门禁管理',
+        children: [
+          { key: '/security/access-control/devices', label: '门禁设备管理' },
+          { key: '/security/access-control/records', label: '门禁识别记录' },
+          { key: '/security/access-control/permissions', label: '门禁权限配置' },
+        ],
+      },
+      { key: '/security/passage', label: '通行管理' },
+      { key: '/security/iot', label: '物联管理' },
     ],
   },
+  {
+    key: 'energy',
+    icon: <ThunderboltOutlined />,
+    label: '能源管理',
+    children: energyMenuChildren,
+  },
+  {
+    key: 'innovation-center',
+    icon: <ExperimentOutlined />,
+    label: '开放创新中心',
+    children: [
+      { key: '/innovation-center/flow-meters', label: '流量计设备管理' },
+      { key: '/innovation-center/floor-plans', label: '二维图纸管理' },
+    ],
+  },
+  { key: '/plc-hvac/systems', icon: <AppstoreOutlined />, label: 'PLC风系统管理' },
   { key: '/process', icon: <DesktopOutlined />, label: '流程管理' },
   { key: '/mobile', icon: <MobileOutlined />, label: '移动端管理' },
   { key: '/customer', icon: <CustomerServiceOutlined />, label: '客户管理' },
@@ -109,16 +152,25 @@ export default function MainLayout() {
   const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>(['spare-parts', 'security']);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [tabs, setTabs] = useState<TabItem[]>([
     { key: '/home', label: '首页', closable: false },
   ]);
 
-  const selectedKeys = useMemo(() => [location.pathname], [location.pathname]);
+  const selectedKeys = useMemo(() => {
+    if (location.pathname.startsWith('/innovation-center/floor-plans/')) {
+      return ['/innovation-center/floor-plans'];
+    }
+    return [location.pathname];
+  }, [location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;
-    const title = routeTitleMap[path];
+    const title =
+      routeTitleMap[path] ??
+      (path.startsWith('/innovation-center/floor-plans/')
+        ? '二维平面图'
+        : undefined);
     if (!title) return;
 
     setTabs((prev) => {
@@ -139,6 +191,26 @@ export default function MainLayout() {
     if (path.startsWith('/security/alarms')) {
       setOpenKeys((prev) =>
         [...new Set([...prev, 'security', 'security-alarms'])],
+      );
+    }
+    if (path.startsWith('/security/access-control')) {
+      setOpenKeys((prev) =>
+        [...new Set([...prev, 'security', 'security-access'])],
+      );
+    }
+    if (path.startsWith('/security/parking') || path.startsWith('/security/monitoring') || path.startsWith('/security/passage') || path.startsWith('/security/iot')) {
+      setOpenKeys((prev) =>
+        [...new Set([...prev, 'security'])],
+      );
+    }
+    if (path.startsWith('/energy')) {
+      setOpenKeys((prev) =>
+        [...new Set([...prev, ...getEnergyOpenKeys(path)])],
+      );
+    }
+    if (path.startsWith('/innovation-center')) {
+      setOpenKeys((prev) =>
+        [...new Set([...prev, 'innovation-center'])],
       );
     }
   }, [location.pathname]);
