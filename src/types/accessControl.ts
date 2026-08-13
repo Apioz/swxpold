@@ -13,6 +13,30 @@ export interface AccessControlGroup {
   updateTime: string;
 }
 
+/** 门禁点配置 */
+export interface AccessControlPoint {
+  id: string;
+  /** 关联门禁设备 ID */
+  deviceId: string;
+  /** 门禁设备名称 */
+  deviceName: string;
+  /** 门禁点名称 */
+  pointName: string;
+  /** 安装位置 */
+  installLocation: string;
+  /** 设备编号 */
+  deviceCode: string;
+  /** 进出方向 */
+  direction: AccessDirection;
+  /** 是否启用 */
+  enabled: boolean;
+  /** 本门禁点直接授权人员（不含门禁组批量授权） */
+  authorizedPersonIds: string[];
+  remark?: string;
+  updater: string;
+  updateTime: string;
+}
+
 /** 门禁识别记录 */
 export type AccessRecognitionResult = '通行成功' | '权限不足' | '黑名单';
 export type AccessRecognitionType = '刷卡' | '人脸' | '二维码';

@@ -1,4 +1,4 @@
-import type { AccessControlGroup } from '../types/accessControl';
+import type { AccessControlGroup, AccessControlPoint } from '../types/accessControl';
 import { getDevicesByType } from './mockFlowMeters';
 
 function findDoorIds(keywords: string[]): string[] {
@@ -50,3 +50,20 @@ export const mockAccessControlGroups: AccessControlGroup[] = [
     updateTime: '2026-07-28 14:20:00',
   },
 ];
+
+export const mockAccessControlPoints: AccessControlPoint[] = getDevicesByType('门禁').map(
+  (device, index) => ({
+    id: `acp-${device.id}`,
+    deviceId: device.id,
+    deviceName: device.name,
+    pointName: device.name.replace(/门禁$/, '') || device.name,
+    installLocation: device.installLocation || device.roomNo,
+    deviceCode: device.code,
+    direction: index % 3 === 0 ? '出' : '进',
+    enabled: device.status !== 'offline',
+    authorizedPersonIds: index % 7 === 0 ? ['p-010'] : index % 11 === 0 ? ['p-006', 'p-013'] : [],
+    remark: index % 5 === 0 ? '需刷卡+人脸双重验证' : undefined,
+    updater: index % 2 === 0 ? '管理员1' : 'admin',
+    updateTime: `2026-08-0${(index % 3) + 1} ${10 + (index % 8)}:${String(index % 60).padStart(2, '0')}:00`,
+  }),
+);

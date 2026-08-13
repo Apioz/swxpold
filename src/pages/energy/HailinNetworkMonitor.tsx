@@ -24,23 +24,33 @@ import {
   hailinPipeSegments,
 } from '../../data/mockHailinMeters';
 import { getHailinRuntimeDetailRows } from '../../config/hailinRuntimeFields';
+import HailinNetworkCanvas from './HailinNetworkCanvas';
 import './HailinMeter.css';
 
 function toTreeData(nodes: typeof hailinNetworkTree): DataNode[] {
   return nodes.map((n) => ({
     key: n.key,
-    title: n.code ? (
-      <span className="hailin-tree-leaf">
-        <span className={`hailin-status-dot ${n.status}`} />
-        {n.title}
-      </span>
-    ) : (
-      n.title
-    ),
+    title: n.title,
+    icon: n.code ? <span className={`hailin-status-dot ${n.status}`} /> : undefined,
     children: n.children ? toTreeData(n.children) : undefined,
-    selectable: !!n.code,
-    isLeaf: !!n.code,
+    selectable: Boolean(n.code),
+    isLeaf: Boolean(n.code),
   }));
+}
+
+function filterTreeNodes(nodes: DataNode[], keyword: string): DataNode[] {
+  if (!keyword.trim()) return nodes;
+  const kw = keyword.trim().toLowerCase();
+
+  return nodes
+    .map((node) => {
+      const children = node.children ? filterTreeNodes(node.children, keyword) : undefined;
+      const titleText = String(node.title ?? '').toLowerCase();
+      const matched = titleText.includes(kw) || Boolean(children?.length);
+      if (!matched) return null;
+      return { ...node, children };
+    })
+    .filter(Boolean) as DataNode[];
 }
 
 export default function HailinNetworkMonitor() {
@@ -50,6 +60,10 @@ export default function HailinNetworkMonitor() {
   const [runtime, setRuntime] = useState(() => getHailinRuntime('hailin-W004'));
 
   const treeData = useMemo(() => toTreeData(hailinNetworkTree), []);
+  const filteredTreeData = useMemo(
+    () => filterTreeNodes(treeData, search),
+    [treeData, search],
+  );
   const device = useMemo(() => getHailinDeviceById(selectedId), [selectedId]);
 
   useEffect(() => {
@@ -85,23 +99,23 @@ export default function HailinNetworkMonitor() {
             />
           </div>
           <Tree
-            treeData={treeData}
+            blockNode
+            showIcon
+            treeData={filteredTreeData}
             defaultExpandAll
             selectedKeys={[selectedId]}
             onSelect={(keys) => {
-              const key = keys[0] as string;
-              if (key?.startsWith('hailin-')) setSelectedId(key);
-            }}
-            filterTreeNode={(node) => {
-              if (!search.trim()) return false;
-              return String(node.title).includes(search.trim());
+              const key = keys[0] as string | undefined;
+              if (key?.startsWith('hailin-')) {
+                setSelectedId(key);
+              }
             }}
           />
         </div>
 
         <div className="hailin-monitor-center">
           <div className="hailin-monitor-center-head">
-            <strong>2D 管网流程图</strong>
+            <strong>2D 管网平面图</strong>
             <div className="hailin-diagram-legend">
               <span><span className="line main" />总管</span>
               <span><span className="line branch" />支路</span>
@@ -115,52 +129,14 @@ export default function HailinNetworkMonitor() {
               <Button size="small" icon={<PlusOutlined />} onClick={() => setZoom((z) => Math.min(140, z + 10))} />
             </Space>
           </div>
-          <div className="hailin-diagram-wrap">
+          <div className="hailin-diagram-wrap hailin-network-floor-wrap">
             <div className="hailin-diagram-stage" style={{ transform: `scale(${zoom / 100})` }}>
-              <svg className="hailin-diagram-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {hailinPipeSegments.map((line, i) => (
-                  <line
-                    key={i}
-                    x1={line.x1}
-                    y1={line.y1}
-                    x2={line.x2}
-                    y2={line.y2}
-                    stroke={line.pipeType === 'main' ? '#ff4d4f' : '#1890ff'}
-                    strokeWidth={line.pipeType === 'main' ? '1.2' : '0.9'}
-                    strokeLinecap="round"
-                  />
-                ))}
-              </svg>
-
-              <div className="hailin-inlet-node">
-                <div className="hailin-inlet-title">市政进水</div>
-                <div className="hailin-inlet-spec">DN300</div>
-              </div>
-
-              {hailinDiagramNodes.map((node) => (
-                <div
-                  key={node.deviceId}
-                  className={`hailin-diagram-node ${node.status} ${selectedId === node.deviceId ? 'active' : ''}`}
-                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                  onClick={() => setSelectedId(node.deviceId)}
-                >
-                  <div className="node-header">
-                    <span className="node-code">{node.code}</span>
-                    {node.status === 'online' && <span className="node-badge online">在线</span>}
-                    {node.status === 'offline' && <span className="node-badge offline">离线</span>}
-                  </div>
-                  <div className="node-label">{node.label}</div>
-                  <div className="node-status-text">
-                    {node.status === 'offline' ? '离线 · 无数据' : '在线 · 正常'}
-                  </div>
-                  <div className="node-flow">
-                    瞬时: {node.status === 'offline' ? '--' : `${node.instantFlow} m³/h`}
-                  </div>
-                  <div className="node-flow">
-                    累计: {node.cumulativeFlow} m³
-                  </div>
-                </div>
-              ))}
+              <HailinNetworkCanvas
+                pipeSegments={hailinPipeSegments}
+                nodes={hailinDiagramNodes}
+                selectedId={selectedId}
+                onNodeClick={setSelectedId}
+              />
             </div>
           </div>
         </div>

@@ -1,105 +1,81 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   Button,
   Form,
   Input,
   Space,
   Table,
-  Tabs,
+  Tree,
 } from 'antd';
-import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
+import type { DataNode } from 'antd/es/tree';
+import type { TablePaginationConfig } from 'antd/es/table';
 import {
+  CloudOutlined,
   ColumnHeightOutlined,
   DownloadOutlined,
+  ExperimentOutlined,
   FullscreenOutlined,
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import type { FacilityDeviceType, FlowMeterDevice } from '../../types/innovationCenter';
-import {
-  DEVICE_TYPE_COLUMN_LABELS,
-  FACILITY_DEVICE_TYPES,
-} from '../../types/innovationCenter';
-import {
-  countDevicesByType,
-  getDevicesByType,
-  mockFlowMeters,
-} from '../../data/mockFlowMeters';
-import FlowMeterDeviceDetailModal from './FlowMeterDeviceDetailModal';
+import type { FlowMeterManagementDeviceType, FlowMeterDevice } from '../../types/innovationCenter';
+import { FLOW_METER_MANAGEMENT_TYPES } from '../../types/innovationCenter';
+import { countDevicesByType, getDevicesByType } from '../../data/mockFlowMeters';
+import { buildDeviceLedgerColumns } from '../../config/deviceLedgerColumns';
+import FlowMeterDataChartModal from './FlowMeterDataChartModal';
+import FlowMeterMeterAction from './FlowMeterMeterAction';
 import './InnovationCenter.css';
 
 interface SearchForm {
-  roomNo?: string;
+  installLocation?: string;
   name?: string;
   code?: string;
 }
 
-function buildColumns(
-  type: FacilityDeviceType,
-  onView: (device: FlowMeterDevice) => void,
-): ColumnsType<FlowMeterDevice> {
-  const labels = DEVICE_TYPE_COLUMN_LABELS[type];
-  const cols: ColumnsType<FlowMeterDevice> = [
-    { title: '设备编号', dataIndex: 'indexNo', width: 90, align: 'center' },
-    { title: '房间号', dataIndex: 'roomNo', width: 100, render: (v) => v || '-' },
-    { title: labels.name, dataIndex: 'name', width: 240, ellipsis: true },
-    { title: labels.code, dataIndex: 'code', width: 160, ellipsis: true },
+const typeIcons: Record<FlowMeterManagementDeviceType, ReactNode> = {
+  纯水流量计: <ExperimentOutlined className="flow-meter-tree-icon" />,
+  压差计: <ColumnHeightOutlined className="flow-meter-tree-icon" />,
+  温湿度传感器: <CloudOutlined className="flow-meter-tree-icon" />,
+};
+
+function buildTreeData(): DataNode[] {
+  return [
+    {
+      key: 'flow-meter-root',
+      title: '创新中心设备',
+      selectable: false,
+      children: FLOW_METER_MANAGEMENT_TYPES.map((type) => ({
+        key: type,
+        title: `${type}（${countDevicesByType(type)}）`,
+        icon: typeIcons[type],
+        isLeaf: true,
+      })),
+    },
   ];
+}
 
-  if (labels.ip) {
-    cols.push({
-      title: labels.ip,
-      dataIndex: 'ip',
-      width: 140,
-      render: (v: string) => v || '-',
-    });
-  }
+function filterTreeNodes(nodes: DataNode[], keyword: string): DataNode[] {
+  if (!keyword.trim()) return nodes;
+  const kw = keyword.trim().toLowerCase();
 
-  if (type === '门禁控制器') {
-    cols.splice(3, 0, {
-      title: '规格',
-      dataIndex: 'spec',
-      width: 110,
-      render: (v: string) => v || '-',
-    });
-  }
-
-  if (type === '摄像头') {
-    cols.push(
-      { title: '账号', dataIndex: 'account', width: 90 },
-      { title: '密码', dataIndex: 'password', width: 100 },
-    );
-  }
-
-  if (type === '会议屏') {
-    cols.push({
-      title: 'MAC地址',
-      dataIndex: 'mac',
-      width: 150,
-      render: (v: string) => v || '-',
-    });
-  }
-
-  cols.push({
-    title: '操作',
-    key: 'action',
-    width: 80,
-    fixed: 'right',
-    render: (_, record) => (
-      <a onClick={() => onView(record)}>查看</a>
-    ),
-  });
-
-  return cols;
+  return nodes
+    .map((node) => {
+      const children = node.children ? filterTreeNodes(node.children, keyword) : undefined;
+      const titleText = String(node.title ?? '').toLowerCase();
+      const matched = titleText.includes(kw) || Boolean(children?.length);
+      if (!matched) return null;
+      return { ...node, children };
+    })
+    .filter(Boolean) as DataNode[];
 }
 
 function DeviceTable({
   deviceType,
   onView,
 }: {
-  deviceType: FacilityDeviceType;
+  deviceType: FlowMeterManagementDeviceType;
   onView: (device: FlowMeterDevice) => void;
 }) {
   const [search, setSearch] = useState<SearchForm>({});
@@ -115,22 +91,31 @@ function DeviceTable({
 
   const filteredData = useMemo(() => {
     return getDevicesByType(deviceType).filter((item) => {
-      if (search.roomNo && !item.roomNo.includes(search.roomNo.trim())) return false;
+      const location = item.installLocation || item.roomNo;
+      if (search.installLocation && !location.includes(search.installLocation.trim())) return false;
       if (search.name && !item.name.includes(search.name.trim())) return false;
       if (search.code && !item.code.includes(search.code.trim())) return false;
       return true;
     });
   }, [deviceType, search]);
 
+  const columns = useMemo(
+    () =>
+      buildDeviceLedgerColumns((record) => (
+        <FlowMeterMeterAction device={record} onOpen={() => onView(record)} />
+      )),
+    [onView],
+  );
+
   return (
     <>
       <div className="innovation-search-bar">
         <Form form={form} layout="inline" className="innovation-search-form">
-          <Form.Item label="房间号" name="roomNo">
-            <Input placeholder="请输入 房间号" allowClear style={{ width: 140 }} />
+          <Form.Item label="安装位置" name="installLocation">
+            <Input placeholder="请输入 安装位置" allowClear style={{ width: 140 }} />
           </Form.Item>
-          <Form.Item label="设备命名" name="name">
-            <Input placeholder="请输入 设备命名" allowClear style={{ width: 180 }} />
+          <Form.Item label="设备名称" name="name">
+            <Input placeholder="请输入 设备名称" allowClear style={{ width: 180 }} />
           </Form.Item>
           <Form.Item label="设备编号" name="code">
             <Input placeholder="请输入 设备编号" allowClear style={{ width: 180 }} />
@@ -178,9 +163,9 @@ function DeviceTable({
 
         <Table<FlowMeterDevice>
           rowKey="id"
-          columns={buildColumns(deviceType, onView)}
+          columns={columns}
           dataSource={filteredData}
-          scroll={{ x: 1100 }}
+          scroll={{ x: 1800 }}
           pagination={{
             ...pagination,
             total: filteredData.length,
@@ -195,36 +180,74 @@ function DeviceTable({
 }
 
 export default function FlowMeterManagement() {
-  const totalCount = mockFlowMeters.length;
+  const [treeSearch, setTreeSearch] = useState('');
+  const [selectedType, setSelectedType] = useState<FlowMeterManagementDeviceType>('纯水流量计');
   const [detailDevice, setDetailDevice] = useState<FlowMeterDevice | null>(null);
 
+  const treeData = useMemo(() => buildTreeData(), []);
+  const filteredTreeData = useMemo(
+    () => filterTreeNodes(treeData, treeSearch),
+    [treeData, treeSearch],
+  );
+
+  const totalCount = FLOW_METER_MANAGEMENT_TYPES.reduce(
+    (sum, type) => sum + countDevicesByType(type),
+    0,
+  );
+
   return (
-    <div className="innovation-page">
+    <div className="innovation-page flow-meter-manage-page">
       <div className="flow-meter-summary">
         <span>设备总数 <strong>{totalCount}</strong> 台</span>
         <span className="flow-meter-summary-divider">|</span>
-        {FACILITY_DEVICE_TYPES.map((type) => (
+        {FLOW_METER_MANAGEMENT_TYPES.map((type) => (
           <span key={type}>
             {type} {countDevicesByType(type)} 台
           </span>
         ))}
       </div>
 
-      <Tabs
-        className="flow-meter-tabs"
-        defaultActiveKey="纯水流量计"
-        items={FACILITY_DEVICE_TYPES.map((type) => ({
-          key: type,
-          label: `${type}（${countDevicesByType(type)}）`,
-          children: (
-            <DeviceTable
-              deviceType={type}
-              onView={(device) => setDetailDevice(device)}
+      <div className="flow-meter-manage-body">
+        <div className="flow-meter-tree-panel">
+          <div className="flow-meter-tree-panel-head">
+            <span className="panel-title">设备分类</span>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="搜索设备类型..."
+              allowClear
+              value={treeSearch}
+              onChange={(e) => setTreeSearch(e.target.value)}
             />
-          ),
-        }))}
-      />
-      <FlowMeterDeviceDetailModal
+          </div>
+          <Tree
+            blockNode
+            showIcon
+            defaultExpandAll
+            treeData={filteredTreeData}
+            selectedKeys={[selectedType]}
+            onSelect={(keys) => {
+              const key = keys[0] as FlowMeterManagementDeviceType | undefined;
+              if (key && (FLOW_METER_MANAGEMENT_TYPES as readonly string[]).includes(key)) {
+                setSelectedType(key);
+              }
+            }}
+          />
+        </div>
+
+        <div className="flow-meter-manage-content">
+          <div className="flow-meter-manage-content-head">
+            <h3>{selectedType}</h3>
+            <span>共 {countDevicesByType(selectedType)} 台设备</span>
+          </div>
+
+          <DeviceTable
+            deviceType={selectedType}
+            onView={(device) => setDetailDevice(device)}
+          />
+        </div>
+      </div>
+
+      <FlowMeterDataChartModal
         device={detailDevice}
         open={detailDevice !== null}
         onClose={() => setDetailDevice(null)}

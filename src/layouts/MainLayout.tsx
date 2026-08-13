@@ -51,8 +51,7 @@ const routeTitleMap: Record<string, string> = {
   '/security/passage': '通行管理',
   '/security/iot': '物联管理',
   ...energyRouteTitleMap,
-  '/innovation-center/flow-meters': '流量计设备管理',
-  '/innovation-center/floor-plans': '二维图纸管理',
+  '/innovation-center/flow-meters': '创新中心设备管理',
   '/plc-hvac/systems': 'PLC风系统管理',
   '/process': '流程管理',
   '/mobile': '移动端管理',
@@ -60,6 +59,7 @@ const routeTitleMap: Record<string, string> = {
   '/project': '项目管理',
   '/system': '系统管理',
   '/task': '任务管理',
+  '/mid-platform-entry': '生物芯片中台',
 };
 
 const menuItems: MenuItem[] = [
@@ -128,8 +128,7 @@ const menuItems: MenuItem[] = [
     icon: <ExperimentOutlined />,
     label: '开放创新中心',
     children: [
-      { key: '/innovation-center/flow-meters', label: '流量计设备管理' },
-      { key: '/innovation-center/floor-plans', label: '二维图纸管理' },
+      { key: '/innovation-center/flow-meters', label: '创新中心设备管理' },
     ],
   },
   { key: '/plc-hvac/systems', icon: <AppstoreOutlined />, label: 'PLC风系统管理' },
@@ -139,6 +138,7 @@ const menuItems: MenuItem[] = [
   { key: '/project', icon: <ProjectOutlined />, label: '项目管理' },
   { key: '/system', icon: <SettingOutlined />, label: '系统管理' },
   { key: '/task', icon: <UnorderedListOutlined />, label: '任务管理' },
+  { key: '/mid-platform/operations/personnel', icon: <AppstoreOutlined />, label: '生物芯片中台' },
 ];
 
 interface TabItem {
@@ -158,19 +158,12 @@ export default function MainLayout() {
   ]);
 
   const selectedKeys = useMemo(() => {
-    if (location.pathname.startsWith('/innovation-center/floor-plans/')) {
-      return ['/innovation-center/floor-plans'];
-    }
     return [location.pathname];
   }, [location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;
-    const title =
-      routeTitleMap[path] ??
-      (path.startsWith('/innovation-center/floor-plans/')
-        ? '二维平面图'
-        : undefined);
+    const title = routeTitleMap[path];
     if (!title) return;
 
     setTabs((prev) => {
@@ -258,15 +251,17 @@ export default function MainLayout() {
           <span className="logo-mark">芯</span>
           {!collapsed && <span className="logo-text">生物芯片</span>}
         </div>
-        <Menu
-          theme="light"
-          mode="inline"
-          selectedKeys={selectedKeys}
-          openKeys={openKeys}
-          onOpenChange={onOpenChange}
-          onClick={onMenuClick}
-          items={menuItems}
-        />
+        <div className="main-sider-menu-wrap">
+          <Menu
+            theme="light"
+            mode="inline"
+            selectedKeys={selectedKeys}
+            openKeys={openKeys}
+            onOpenChange={onOpenChange}
+            onClick={onMenuClick}
+            items={menuItems}
+          />
+        </div>
       </Sider>
       <Layout className="main-layout-right">
         <Header className="main-header">

@@ -5,6 +5,7 @@ export interface Person {
   id: string;
   employeeNo: string;
   name: string;
+  company: string;
   department: string;
   phone: string;
   cardNo: string;

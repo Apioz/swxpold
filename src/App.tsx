@@ -2,6 +2,7 @@ import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
+import MidPlatformLayout from './layouts/MidPlatformLayout';
 import PlaceholderPage from './pages/PlaceholderPage';
 import SparePartsLedger from './pages/spare-parts/SparePartsLedger';
 import InboundManagement from './pages/spare-parts/InboundManagement';
@@ -13,8 +14,6 @@ import AlarmStatistics from './pages/security/AlarmStatistics';
 import AlarmEvents from './pages/security/AlarmEvents';
 import EventWorkbench from './pages/security/EventWorkbench';
 import FlowMeterManagement from './pages/innovation-center/FlowMeterManagement';
-import FloorPlanManagement from './pages/innovation-center/FloorPlanManagement';
-import FloorPlanViewer from './pages/innovation-center/FloorPlanViewer';
 import PlcHvacManagement from './pages/plc-hvac/PlcHvacManagement';
 import AccessPermissionConfig from './pages/access-control/AccessPermissionConfig';
 import AccessDeviceManagement from './pages/security/access-control/AccessDeviceManagement';
@@ -22,6 +21,8 @@ import AccessRecognitionRecords from './pages/security/access-control/AccessReco
 import HailinMeterLedger from './pages/energy/HailinMeterLedger';
 import HailinNetworkMonitor from './pages/energy/HailinNetworkMonitor';
 import HailinDataAnalysis from './pages/energy/HailinDataAnalysis';
+import MidPlatformPersonnelManagement from './pages/mid-platform/operations/PersonnelManagement';
+import OperationsHome from './pages/mid-platform/operations/OperationsHome';
 import './App.css';
 
 function App() {
@@ -35,7 +36,7 @@ function App() {
         },
       }}
     >
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || undefined}>
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="/spare-parts/ledger" replace />} />
@@ -174,12 +175,16 @@ function App() {
               element={<FlowMeterManagement />}
             />
             <Route
-              path="innovation-center/floor-plans"
-              element={<FloorPlanManagement />}
+              path="innovation-center/data-records"
+              element={<Navigate to="/innovation-center/flow-meters" replace />}
             />
             <Route
-              path="innovation-center/floor-plans/:floorId"
-              element={<FloorPlanViewer />}
+              path="innovation-center/flow-meters/history"
+              element={<Navigate to="/innovation-center/flow-meters" replace />}
+            />
+            <Route
+              path="innovation-center/floor-plans/*"
+              element={<Navigate to="/innovation-center/flow-meters" replace />}
             />
             <Route path="plc-hvac/systems" element={<PlcHvacManagement />} />
             <Route
@@ -207,6 +212,17 @@ function App() {
               element={<PlaceholderPage title="任务管理" />}
             />
             <Route path="*" element={<Navigate to="/spare-parts/ledger" replace />} />
+          </Route>
+          <Route path="/mid-platform" element={<MidPlatformLayout />}>
+            <Route
+              index
+              element={<Navigate to="/mid-platform/operations/personnel" replace />}
+            />
+            <Route path="operations/home" element={<OperationsHome />} />
+            <Route
+              path="operations/personnel"
+              element={<MidPlatformPersonnelManagement />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>

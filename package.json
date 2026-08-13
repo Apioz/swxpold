@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview --host"
-  },
+  "dev": "vite --host",
+  "build": "tsc -b && vite build",
+  "lint": "oxlint",
+  "preview": "vite preview --host",
+  "deploy": "gh-pages -d dist"
+},
   "dependencies": {
     "@ant-design/icons": "^6.3.2",
     "antd": "^6.5.1",
@@ -25,6 +26,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "gh-pages": "^6.3.0",
     "oxlint": "^1.71.0",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"

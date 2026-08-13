@@ -8,6 +8,7 @@ import {
   Select,
   Space,
   Table,
+  Tabs,
   Tag,
   message,
 } from 'antd';
@@ -21,12 +22,12 @@ import {
   SearchOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import type { AccessControlGroup } from '../../types/accessControl';
-import type { Person } from '../../types/personnel';
-import type { FlowMeterDevice } from '../../types/innovationCenter';
-import { getDevicesByType } from '../../data/mockFlowMeters';
-import { getActivePersonnel, getPersonById } from '../../data/mockPersonnel';
+import type { AccessControlGroup, AccessControlPoint } from '../../types/accessControl';
+import { getPersonById } from '../../data/mockPersonnel';
+import { getEffectivePersonIds } from '../../utils/accessControlPermissions';
 import { useAccessControlStore } from '../../store/accessControlStore';
+import AccessPointConfigPanel from './AccessPointConfigPanel';
+import PersonnelTreeSelector from './PersonnelTreeSelector';
 import '../spare-parts/SpareModals.css';
 import './AccessControl.css';
 
@@ -47,142 +48,15 @@ function formatNow(): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
 
-function resolveDoors(ids: string[], doorMap: Map<string, FlowMeterDevice>): FlowMeterDevice[] {
-  return ids.map((id) => doorMap.get(id)).filter(Boolean) as FlowMeterDevice[];
-}
-
-interface PersonOption {
-  label: string;
-  value: string;
-}
-
-function AuthorizedPersonSelector({
-  value = [],
-  onChange,
-  personOptions,
-}: {
-  value?: string[];
-  onChange?: (ids: string[]) => void;
-  personOptions: PersonOption[];
-}) {
-  const [pickerValues, setPickerValues] = useState<string[]>([]);
-  const [selectedPersonKeys, setSelectedPersonKeys] = useState<string[]>([]);
-
-  const selectedPersons = useMemo(
-    () =>
-      value
-        .map((id) => getPersonById(id))
-        .filter(Boolean) as Person[],
-    [value],
-  );
-
-  const availableOptions = useMemo(
-    () => personOptions.filter((opt) => !value.includes(opt.value)),
-    [personOptions, value],
-  );
-
-  const handlePickerChange = (ids: string[]) => {
-    const toAdd = ids.filter((id) => !value.includes(id));
-    if (toAdd.length > 0) {
-      onChange?.([...value, ...toAdd]);
-    }
-    setPickerValues([]);
-  };
-
-  const removePerson = (personId: string) => {
-    onChange?.(value.filter((id) => id !== personId));
-    setSelectedPersonKeys((keys) => keys.filter((k) => k !== personId));
-  };
-
-  const batchRemovePersons = () => {
-    if (selectedPersonKeys.length === 0) {
-      message.warning('请先选择要删除的人员');
-      return;
-    }
-    Modal.confirm({
-      title: '批量删除确认',
-      content: `确定从授权列表中移除选中的 ${selectedPersonKeys.length} 名人员吗？`,
-      okText: '确定删除',
-      okButtonProps: { danger: true },
-      cancelText: '取消',
-      onOk: () => {
-        onChange?.(value.filter((id) => !selectedPersonKeys.includes(id)));
-        setSelectedPersonKeys([]);
-        message.success(`已移除 ${selectedPersonKeys.length} 名人员`);
-      },
-    });
-  };
-
-  return (
-    <div className="access-person-selector">
-      <Select
-        mode="multiple"
-        placeholder="搜索并选择人员（可多选，选中即添加至下方列表）"
-        options={availableOptions}
-        optionFilterProp="label"
-        showSearch
-        value={pickerValues}
-        onChange={handlePickerChange}
-        disabled={availableOptions.length === 0}
-        notFoundContent={availableOptions.length === 0 ? '暂无可添加人员' : undefined}
-        maxTagCount="responsive"
-        style={{ width: '100%' }}
-      />
-      <div className="access-person-list-head">
-        <span>已授权人员（{selectedPersons.length}）</span>
-        <Space size="middle">
-          <span className="access-person-list-hint">未添加的人员无法通行本组门禁</span>
-          <Button
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            disabled={selectedPersonKeys.length === 0}
-            onClick={batchRemovePersons}
-          >
-            批量删除{selectedPersonKeys.length > 0 ? ` (${selectedPersonKeys.length})` : ''}
-          </Button>
-        </Space>
-      </div>
-      <Table
-        size="small"
-        rowKey="id"
-        pagination={false}
-        locale={{ emptyText: '暂未添加授权人员，请从上方搜索添加' }}
-        dataSource={selectedPersons}
-        className="access-person-list-table"
-        rowSelection={{
-          selectedRowKeys: selectedPersonKeys,
-          onChange: (keys) => setSelectedPersonKeys(keys as string[]),
-        }}
-        columns={[
-          { title: '工号', dataIndex: 'employeeNo', width: 100 },
-          { title: '姓名', dataIndex: 'name', width: 90 },
-          { title: '部门', dataIndex: 'department', ellipsis: true },
-          { title: '卡号', dataIndex: 'cardNo', width: 120 },
-          { title: '手机号', dataIndex: 'phone', width: 130 },
-          {
-            title: '操作',
-            width: 70,
-            align: 'center',
-            render: (_, record) => (
-              <a className="danger-link" onClick={() => removePerson(record.id)}>
-                删除
-              </a>
-            ),
-          },
-        ]}
-      />
-    </div>
-  );
+function resolvePoints(ids: string[], pointMap: Map<string, AccessControlPoint>): AccessControlPoint[] {
+  return ids.map((id) => pointMap.get(id)).filter(Boolean) as AccessControlPoint[];
 }
 
 export default function AccessPermissionConfig() {
-  const [groups, { setAccessControlGroups }] = useAccessControlStore();
-  const doorDevices = useMemo(() => getDevicesByType('门禁'), []);
-  const personnel = useMemo(() => getActivePersonnel(), []);
-  const doorMap = useMemo(
-    () => new Map(doorDevices.map((d) => [d.id, d])),
-    [doorDevices],
+  const [groups, points, { setAccessControlGroups }] = useAccessControlStore();
+  const pointMap = useMemo(
+    () => new Map(points.map((p) => [p.deviceId, p])),
+    [points],
   );
 
   const [search, setSearch] = useState<SearchForm>({});
@@ -211,20 +85,13 @@ export default function AccessPermissionConfig() {
 
   const doorOptions = useMemo(
     () =>
-      doorDevices.map((d) => ({
-        label: `${d.name}（${d.code}）`,
-        value: d.id,
-      })),
-    [doorDevices],
-  );
-
-  const personOptions = useMemo(
-    () =>
-      personnel.map((p) => ({
-        label: `${p.name}（${p.employeeNo} · ${p.department}）`,
-        value: p.id,
-      })),
-    [personnel],
+      points
+        .filter((p) => p.enabled)
+        .map((p) => ({
+          label: `${p.pointName}（${p.deviceCode}）`,
+          value: p.deviceId,
+        })),
+    [points],
   );
 
   const openAddModal = () => {
@@ -394,7 +261,7 @@ export default function AccessPermissionConfig() {
   ];
 
   const expandedRowRender = (record: AccessControlGroup) => {
-    const doors = resolveDoors(record.doorPointIds, doorMap);
+    const groupPoints = resolvePoints(record.doorPointIds, pointMap);
     const persons = record.authorizedPersonIds
       .map((id) => getPersonById(id))
       .filter(Boolean);
@@ -402,33 +269,39 @@ export default function AccessPermissionConfig() {
     return (
       <div className="access-group-expand">
         <div className="access-group-expand-block">
-          <h4>门禁点设备（{doors.length}）</h4>
+          <h4>组内门禁点（{groupPoints.length}）</h4>
           <Table
             size="small"
             rowKey="id"
             pagination={false}
-            dataSource={doors}
+            dataSource={groupPoints}
             columns={[
-              { title: '设备命名', dataIndex: 'name', ellipsis: true },
-              { title: '设备编号', dataIndex: 'code', width: 160 },
-              { title: '房间号', dataIndex: 'roomNo', width: 90 },
-              { title: 'IP', dataIndex: 'ip', width: 130 },
+              { title: '门禁点名称', dataIndex: 'pointName', ellipsis: true },
+              { title: '设备编号', dataIndex: 'deviceCode', width: 160 },
+              { title: '安装位置', dataIndex: 'installLocation', width: 160, ellipsis: true },
+              {
+                title: '有效权限人数',
+                key: 'effective',
+                width: 110,
+                align: 'center',
+                render: (_, point) => getEffectivePersonIds(point, groups).length,
+              },
             ]}
           />
         </div>
         <div className="access-group-expand-block">
-          <h4>授权人员（{persons.length}）— 仅以下人员拥有通行权限</h4>
+          <h4>组内批量授权人员（{persons.length}）— 对组内全部门禁点生效</h4>
           <Table
             size="small"
             rowKey="id"
             pagination={false}
             dataSource={persons}
             columns={[
+              { title: '公司', dataIndex: 'company', width: 160, ellipsis: true },
               { title: '工号', dataIndex: 'employeeNo', width: 100 },
               { title: '姓名', dataIndex: 'name', width: 90 },
               { title: '部门', dataIndex: 'department', width: 120 },
               { title: '卡号', dataIndex: 'cardNo', width: 120 },
-              { title: '手机号', dataIndex: 'phone', width: 130 },
             ]}
           />
         </div>
@@ -438,86 +311,105 @@ export default function AccessPermissionConfig() {
 
   return (
     <div className="access-control-page">
-      <p className="access-control-desc">
-        门禁权限以「门禁组」为单位管理。每个门禁组包含若干门禁点设备，并为组内门禁授权通行人员。
-        <strong>仅被授权的人员可通行对应门禁，未添加的人员无通行权限。</strong>
-        人员从人员管理列表中选取。
-      </p>
+      <Tabs
+        className="access-permission-tabs"
+        defaultActiveKey="points"
+        items={[
+          {
+            key: 'points',
+            label: '门禁点',
+            children: <AccessPointConfigPanel />,
+          },
+          {
+            key: 'groups',
+            label: '门禁组',
+            children: (
+              <>
+                <p className="access-control-desc">
+                  门禁组从已配置的门禁点中选取多个进行分组。
+                  <strong>在门禁组中添加的人员，将批量获得组内全部门禁点的通行权限；</strong>
+                  若仅需单个门禁点授权，请在「门禁点」Tab 中配置。
+                </p>
 
-      <div className="access-search-bar">
-        <Form form={form} layout="inline" className="access-search-form">
-          <Form.Item label="门禁组名称" name="groupName">
-            <Input placeholder="请输入 门禁组名称" allowClear style={{ width: 180 }} />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                onClick={() => {
-                  setSearch(form.getFieldsValue());
-                  setPagination((p) => ({ ...p, current: 1 }));
-                }}
-              >
-                搜索
-              </Button>
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={() => {
-                  form.resetFields();
-                  setSearch({});
-                  setPagination((p) => ({ ...p, current: 1 }));
-                }}
-              >
-                重置
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </div>
+                <div className="access-search-bar">
+                  <Form form={form} layout="inline" className="access-search-form">
+                    <Form.Item label="门禁组名称" name="groupName">
+                      <Input placeholder="请输入 门禁组名称" allowClear style={{ width: 180 }} />
+                    </Form.Item>
+                    <Form.Item>
+                      <Space>
+                        <Button
+                          type="primary"
+                          icon={<SearchOutlined />}
+                          onClick={() => {
+                            setSearch(form.getFieldsValue());
+                            setPagination((p) => ({ ...p, current: 1 }));
+                          }}
+                        >
+                          搜索
+                        </Button>
+                        <Button
+                          icon={<ReloadOutlined />}
+                          onClick={() => {
+                            form.resetFields();
+                            setSearch({});
+                            setPagination((p) => ({ ...p, current: 1 }));
+                          }}
+                        >
+                          重置
+                        </Button>
+                      </Space>
+                    </Form.Item>
+                  </Form>
+                </div>
 
-      <div className="access-table-card">
-        <div className="access-table-toolbar">
-          <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
-              新增门禁组
-            </Button>
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              disabled={selectedGroupIds.length === 0}
-              onClick={handleBatchDelete}
-            >
-              批量删除{selectedGroupIds.length > 0 ? ` (${selectedGroupIds.length})` : ''}
-            </Button>
-          </Space>
-          <Space size="middle" className="access-table-utils">
-            <ReloadOutlined title="刷新" />
-            <ColumnHeightOutlined title="密度" />
-            <SettingOutlined title="列设置" />
-            <FullscreenOutlined title="全屏" />
-          </Space>
-        </div>
+                <div className="access-table-card">
+                  <div className="access-table-toolbar">
+                    <Space>
+                      <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
+                        新增门禁组
+                      </Button>
+                      <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        disabled={selectedGroupIds.length === 0}
+                        onClick={handleBatchDelete}
+                      >
+                        批量删除{selectedGroupIds.length > 0 ? ` (${selectedGroupIds.length})` : ''}
+                      </Button>
+                    </Space>
+                    <Space size="middle" className="access-table-utils">
+                      <ReloadOutlined title="刷新" />
+                      <ColumnHeightOutlined title="密度" />
+                      <SettingOutlined title="列设置" />
+                      <FullscreenOutlined title="全屏" />
+                    </Space>
+                  </div>
 
-        <Table<AccessControlGroup>
-          rowKey="id"
-          columns={columns}
-          dataSource={filteredData}
-          scroll={{ x: 1200 }}
-          rowSelection={{
-            selectedRowKeys: selectedGroupIds,
-            onChange: (keys) => setSelectedGroupIds(keys as string[]),
-          }}
-          expandable={{ expandedRowRender }}
-          pagination={{
-            ...pagination,
-            total: filteredData.length,
-            onChange: (page, pageSize) => {
-              setPagination((p) => ({ ...p, current: page, pageSize }));
-            },
-          }}
-        />
-      </div>
+                  <Table<AccessControlGroup>
+                    rowKey="id"
+                    columns={columns}
+                    dataSource={filteredData}
+                    scroll={{ x: 1200 }}
+                    rowSelection={{
+                      selectedRowKeys: selectedGroupIds,
+                      onChange: (keys) => setSelectedGroupIds(keys as string[]),
+                    }}
+                    expandable={{ expandedRowRender }}
+                    pagination={{
+                      ...pagination,
+                      total: filteredData.length,
+                      onChange: (page, pageSize) => {
+                        setPagination((p) => ({ ...p, current: page, pageSize }));
+                      },
+                    }}
+                  />
+                </div>
+              </>
+            ),
+          },
+        ]}
+      />
 
       {/* 新增 / 编辑 */}
       <Modal
@@ -542,10 +434,10 @@ export default function AccessPermissionConfig() {
             <Input.TextArea placeholder="门禁组用途说明" rows={2} maxLength={200} />
           </Form.Item>
           <Form.Item
-            label="门禁点设备"
+            label="门禁点"
             name="doorPointIds"
             rules={[{ required: true, message: '请选择门禁点' }]}
-            extra="从门禁设备列表中选取，可添加多个门禁点"
+            extra="从「门禁点」Tab 已配置列表中选取，可多选"
           >
             <Select
               mode="multiple"
@@ -557,7 +449,7 @@ export default function AccessPermissionConfig() {
             />
           </Form.Item>
           <Form.Item
-            label="授权通行人员"
+            label="批量授权通行人员"
             name="authorizedPersonIds"
             rules={[
               {
@@ -567,8 +459,9 @@ export default function AccessPermissionConfig() {
                     : Promise.reject(new Error('请至少添加一名授权人员')),
               },
             ]}
+            extra="所选人员将批量获得本组内全部门禁点的通行权限"
           >
-            <AuthorizedPersonSelector personOptions={personOptions} />
+            <PersonnelTreeSelector scopeHint="批量授权组内全部门禁点" />
           </Form.Item>
         </Form>
       </Modal>
@@ -596,25 +489,25 @@ export default function AccessPermissionConfig() {
             </Descriptions>
 
             <div className="access-view-section">
-              <h4>门禁点设备（{viewGroup.doorPointIds.length}）</h4>
+              <h4>组内门禁点（{viewGroup.doorPointIds.length}）</h4>
               <Table
                 size="small"
                 rowKey="id"
                 pagination={false}
-                dataSource={resolveDoors(viewGroup.doorPointIds, doorMap)}
+                dataSource={resolvePoints(viewGroup.doorPointIds, pointMap)}
                 columns={[
-                  { title: '设备命名', dataIndex: 'name' },
-                  { title: '设备编号', dataIndex: 'code', width: 160 },
-                  { title: '房间号', dataIndex: 'roomNo', width: 90 },
+                  { title: '门禁点名称', dataIndex: 'pointName' },
+                  { title: '设备编号', dataIndex: 'deviceCode', width: 160 },
+                  { title: '安装位置', dataIndex: 'installLocation', width: 160 },
                 ]}
               />
             </div>
 
             <div className="access-view-section">
               <h4>
-                授权通行人员（{viewGroup.authorizedPersonIds.length}）
+                批量授权人员（{viewGroup.authorizedPersonIds.length}）
                 <Tag color="orange" style={{ marginLeft: 8, fontWeight: 400 }}>
-                  未授权人员无通行权限
+                  对组内全部门禁点生效
                 </Tag>
               </h4>
               <Table
@@ -625,6 +518,7 @@ export default function AccessPermissionConfig() {
                   .map((id) => getPersonById(id))
                   .filter(Boolean)}
                 columns={[
+                  { title: '公司', dataIndex: 'company', width: 160 },
                   { title: '工号', dataIndex: 'employeeNo', width: 100 },
                   { title: '姓名', dataIndex: 'name', width: 90 },
                   { title: '部门', dataIndex: 'department' },

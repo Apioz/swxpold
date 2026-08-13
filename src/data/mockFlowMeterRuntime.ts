@@ -119,7 +119,12 @@ function readingsForType(
           value: s % 5 === 0 ? '待机' : '显示中',
           accent: s % 5 === 0 ? '#fa8c16' : '#52c41a',
         },
-        numReading('brightness', '亮度', 70 + (s % 20), 5, '%', s, '#1890ff'),
+        {
+          key: 'status',
+          label: '状态',
+          value: s % 7 === 0 ? '异常' : '正常',
+          accent: s % 7 === 0 ? '#ff4d4f' : '#52c41a',
+        },
         numReading('cpu', 'CPU占用', 15 + (s % 10), 4, '%', s + 1, '#722ed1'),
         numReading('memory', '内存占用', 42 + (s % 15), 3, '%', s + 2, '#13c2c2'),
       ];
@@ -144,7 +149,7 @@ function getOfflineReadings(type: FacilityDeviceType): FlowMeterReadingItem[] {
     氧浓度: ['氧浓度', '环境温度', '大气压'],
     门禁: ['门状态', '锁状态', '今日通行', '最近通行'],
     摄像头: ['视频流', '帧率', '码率', '分辨率'],
-    会议屏: ['屏幕状态', '亮度', 'CPU占用', '内存占用'],
+    会议屏: ['屏幕状态', '状态', 'CPU占用', '内存占用'],
     门禁控制器: ['接入门数', '在线门数', '心跳间隔', '今日事件'],
   };
 
@@ -162,4 +167,18 @@ export function getFlowMeterRuntime(device: FlowMeterDevice): FlowMeterDeviceRun
     updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     readings: readingsForType(device, offline),
   };
+}
+
+export type FlowMeterDataInterval = '实时' | '时' | '日' | '月' | '年';
+
+export type FlowMeterDataAgg = '采样值' | '最大值' | '最小值' | '平均值';
+
+export function isNumericReading(reading: FlowMeterReadingItem): boolean {
+  return typeof reading.value === 'number' && !Number.isNaN(reading.value);
+}
+
+export function formatReadingDisplay(reading: FlowMeterReadingItem): string {
+  if (reading.value === '--') return '--';
+  if (reading.unit) return `${reading.value}${reading.unit}`;
+  return String(reading.value);
 }

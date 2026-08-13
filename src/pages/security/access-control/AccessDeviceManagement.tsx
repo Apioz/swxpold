@@ -6,9 +6,8 @@ import {
   Space,
   Table,
   Tabs,
-  Tag,
 } from 'antd';
-import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
+import type { TablePaginationConfig } from 'antd/es/table';
 import {
   ColumnHeightOutlined,
   DownloadOutlined,
@@ -19,68 +18,18 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import type { FacilityDeviceType, FlowMeterDevice } from '../../../types/innovationCenter';
-import { DEVICE_TYPE_COLUMN_LABELS } from '../../../types/innovationCenter';
 import { countDevicesByType, getDevicesByType } from '../../../data/mockFlowMeters';
-import FlowMeterDeviceDetailModal from '../../innovation-center/FlowMeterDeviceDetailModal';
+import { buildDeviceLedgerColumns } from '../../../config/deviceLedgerColumns';
+import DeviceLedgerDetailModal from '../../../components/DeviceLedgerDetailModal';
 import '../../innovation-center/InnovationCenter.css';
 import '../SecurityPages.css';
 
 const ACCESS_DEVICE_TYPES: FacilityDeviceType[] = ['门禁', '门禁控制器'];
 
 interface SearchForm {
-  roomNo?: string;
+  installLocation?: string;
   name?: string;
   code?: string;
-}
-
-function buildColumns(
-  type: FacilityDeviceType,
-  onView: (device: FlowMeterDevice) => void,
-): ColumnsType<FlowMeterDevice> {
-  const labels = DEVICE_TYPE_COLUMN_LABELS[type];
-  const cols: ColumnsType<FlowMeterDevice> = [
-    { title: '设备编号', dataIndex: 'indexNo', width: 90, align: 'center' },
-    { title: '房间号', dataIndex: 'roomNo', width: 100, render: (v) => v || '-' },
-    { title: labels.name, dataIndex: 'name', width: 240, ellipsis: true },
-    { title: labels.code, dataIndex: 'code', width: 160, ellipsis: true },
-    { title: labels.ip, dataIndex: 'ip', width: 140, render: (v: string) => v || '-' },
-  ];
-
-  if (type === '门禁控制器') {
-    cols.splice(4, 0, {
-      title: '规格',
-      dataIndex: 'spec',
-      width: 110,
-      render: (v: string) => v || '-',
-    });
-  }
-
-  cols.push(
-    {
-      title: '状态',
-      dataIndex: 'status',
-      width: 90,
-      align: 'center',
-      render: (status: FlowMeterDevice['status']) => {
-        const map: Record<FlowMeterDevice['status'], { color: string; text: string }> = {
-          online: { color: 'success', text: '在线' },
-          offline: { color: 'default', text: '离线' },
-          alarm: { color: 'error', text: '报警' },
-        };
-        const s = map[status];
-        return <Tag color={s.color}>{s.text}</Tag>;
-      },
-    },
-    {
-      title: '操作',
-      key: 'action',
-      width: 80,
-      fixed: 'right',
-      render: (_, record) => <a onClick={() => onView(record)}>查看</a>,
-    },
-  );
-
-  return cols;
 }
 
 function DeviceTable({
@@ -101,9 +50,18 @@ function DeviceTable({
     pageSizeOptions: ['10', '20', '50'],
   });
 
+  const columns = useMemo(
+    () =>
+      buildDeviceLedgerColumns((record) => (
+        <a onClick={() => onView(record)}>查看详情</a>
+      )),
+    [onView],
+  );
+
   const filteredData = useMemo(() => {
     return getDevicesByType(deviceType).filter((item) => {
-      if (search.roomNo && !item.roomNo.includes(search.roomNo.trim())) return false;
+      const location = item.installLocation || item.roomNo;
+      if (search.installLocation && !location.includes(search.installLocation.trim())) return false;
       if (search.name && !item.name.includes(search.name.trim())) return false;
       if (search.code && !item.code.includes(search.code.trim())) return false;
       return true;
@@ -114,11 +72,11 @@ function DeviceTable({
     <>
       <div className="security-search-bar">
         <Form form={form} layout="inline" className="security-search-form">
-          <Form.Item label="房间号" name="roomNo">
-            <Input placeholder="请输入 房间号" allowClear style={{ width: 140 }} />
+          <Form.Item label="安装位置" name="installLocation">
+            <Input placeholder="请输入 安装位置" allowClear style={{ width: 160 }} />
           </Form.Item>
-          <Form.Item label="设备命名" name="name">
-            <Input placeholder="请输入 设备命名" allowClear style={{ width: 180 }} />
+          <Form.Item label="设备名称" name="name">
+            <Input placeholder="请输入 设备名称" allowClear style={{ width: 180 }} />
           </Form.Item>
           <Form.Item label="设备编号" name="code">
             <Input placeholder="请输入 设备编号" allowClear style={{ width: 180 }} />
@@ -166,9 +124,9 @@ function DeviceTable({
 
         <Table<FlowMeterDevice>
           rowKey="id"
-          columns={buildColumns(deviceType, onView)}
+          columns={columns}
           dataSource={filteredData}
-          scroll={{ x: 1100 }}
+          scroll={{ x: 1800 }}
           pagination={{
             ...pagination,
             total: filteredData.length,
@@ -213,7 +171,7 @@ export default function AccessDeviceManagement() {
         }))}
       />
 
-      <FlowMeterDeviceDetailModal
+      <DeviceLedgerDetailModal
         device={detailDevice}
         open={detailDevice !== null}
         onClose={() => setDetailDevice(null)}

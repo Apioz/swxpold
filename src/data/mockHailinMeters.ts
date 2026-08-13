@@ -1,12 +1,21 @@
 import dayjs from 'dayjs';
 import type {
-  HailinDiagramNode,
   HailinHourlyRecord,
   HailinMeterDevice,
   HailinMeterRuntime,
   HailinNetworkNode,
-  HailinPipeSegment,
+  HailinNetworkZone,
 } from '../types/hailinMeter';
+import {
+  floorPlan5FDiagramNodes,
+  floorPlan5FPipeSegments,
+} from './floorPlan5FNetworkLayout';
+
+export const hailinDiagramNodes = floorPlan5FDiagramNodes;
+export const hailinPipeSegments = floorPlan5FPipeSegments;
+
+/** @deprecated 平面图已改为真实图纸底图，保留空数组兼容旧引用 */
+export const hailinNetworkZones: HailinNetworkZone[] = [];
 
 const baseDevices: Omit<HailinMeterDevice, 'id'>[] = [
   {
@@ -213,105 +222,6 @@ export const hailinNetworkTree: HailinNetworkNode[] = [
       { key: 'hailin-W006', title: 'W006 污水外排流量计', code: 'W006', status: 'online' },
     ],
   },
-];
-
-export const hailinDiagramNodes: HailinDiagramNode[] = [
-  {
-    deviceId: 'hailin-W001',
-    code: 'W001',
-    label: 'W001',
-    subLabel: '在线 · 正常',
-    x: 50,
-    y: 22,
-    status: 'online',
-    instantFlow: 216,
-    cumulativeFlow: 1285,
-    nodeType: 'main',
-  },
-  {
-    deviceId: 'hailin-W002',
-    code: 'W002',
-    label: '车间1',
-    subLabel: 'W002',
-    x: 22,
-    y: 48,
-    status: 'online',
-    instantFlow: 78.5,
-    cumulativeFlow: 456,
-    nodeType: 'branch',
-  },
-  {
-    deviceId: 'hailin-W007',
-    code: 'W007',
-    label: '车间2',
-    subLabel: 'W007',
-    x: 22,
-    y: 74,
-    status: 'online',
-    instantFlow: 65.3,
-    cumulativeFlow: 389,
-    nodeType: 'terminal',
-  },
-  {
-    deviceId: 'hailin-W003',
-    code: 'W003',
-    label: '员工宿舍',
-    subLabel: 'W003',
-    x: 50,
-    y: 48,
-    status: 'online',
-    instantFlow: 52.1,
-    cumulativeFlow: 312,
-    nodeType: 'branch',
-  },
-  {
-    deviceId: 'hailin-W004',
-    code: 'W004',
-    label: '厨房机房',
-    subLabel: 'W004',
-    x: 50,
-    y: 74,
-    status: 'offline',
-    instantFlow: 0,
-    cumulativeFlow: 128.4,
-    nodeType: 'terminal',
-  },
-  {
-    deviceId: 'hailin-W005',
-    code: 'W005',
-    label: '绿化用水',
-    subLabel: 'W005',
-    x: 78,
-    y: 48,
-    status: 'online',
-    instantFlow: 28.6,
-    cumulativeFlow: 186,
-    nodeType: 'branch',
-  },
-  {
-    deviceId: 'hailin-W006',
-    code: 'W006',
-    label: '污水外排',
-    subLabel: 'W006',
-    x: 78,
-    y: 74,
-    status: 'online',
-    instantFlow: 35.2,
-    cumulativeFlow: 242,
-    nodeType: 'terminal',
-  },
-];
-
-export const hailinPipeSegments: HailinPipeSegment[] = [
-  { x1: 50, y1: 10, x2: 50, y2: 22, pipeType: 'main' },
-  { x1: 50, y1: 22, x2: 50, y2: 36, pipeType: 'main' },
-  { x1: 22, y1: 36, x2: 78, y2: 36, pipeType: 'branch' },
-  { x1: 22, y1: 36, x2: 22, y2: 48, pipeType: 'branch' },
-  { x1: 22, y1: 48, x2: 22, y2: 74, pipeType: 'branch' },
-  { x1: 50, y1: 36, x2: 50, y2: 48, pipeType: 'branch' },
-  { x1: 50, y1: 48, x2: 50, y2: 74, pipeType: 'branch' },
-  { x1: 78, y1: 36, x2: 78, y2: 48, pipeType: 'branch' },
-  { x1: 78, y1: 48, x2: 78, y2: 74, pipeType: 'branch' },
 ];
 
 const analysisCodes = ['W001', 'W002', 'W003', 'W004', 'W005', 'W006', 'W007'];

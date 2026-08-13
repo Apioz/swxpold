@@ -428,3 +428,34 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 门禁设备 - 查看详情 */
+.access-device-detail-modal .ant-modal-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.access-device-detail-section {
+  margin-bottom: 20px;
+}
+
+.access-device-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.access-device-detail-section-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.access-device-detail-grid .ant-descriptions-item-label {
+  width: 108px;
+  background: #fafafa;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.access-device-detail-grid .ant-descriptions-item-content {
+  color: rgba(0, 0, 0, 0.88);
+}

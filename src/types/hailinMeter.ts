@@ -96,6 +96,17 @@ export interface HailinDiagramNode {
   subLabel?: string;
 }
 
+/** 管网平面图分区 */
+export interface HailinNetworkZone {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  roomType: 'corridor' | 'utility' | 'zone';
+}
+
 /** 分时流量明细 */
 export interface HailinHourlyRecord {
   id: string;

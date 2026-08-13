@@ -23,6 +23,15 @@ export const FACILITY_DEVICE_TYPES: FacilityDeviceType[] = [
   '门禁控制器',
 ];
 
+/** 流量计设备管理页展示的设备类型 */
+export const FLOW_METER_MANAGEMENT_TYPES = [
+  '纯水流量计',
+  '压差计',
+  '温湿度传感器',
+] as const satisfies readonly FacilityDeviceType[];
+
+export type FlowMeterManagementDeviceType = (typeof FLOW_METER_MANAGEMENT_TYPES)[number];
+
 export interface FlowMeterDevice {
   id: string;
   indexNo: number;
@@ -44,34 +53,14 @@ export interface FlowMeterDevice {
   account?: string;
   password?: string;
   gateway?: string;
-}
-
-export type FloorPlanNodeType = 'campus' | 'building' | 'floor';
-
-export interface FloorPlanNode {
-  key: string;
-  title: string;
-  nodeType?: FloorPlanNodeType;
-  children?: FloorPlanNode[];
-  floorId?: string;
-  isLeaf?: boolean;
-}
-
-export interface FloorPlanRoom {
-  id: string;
-  label: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface FloorPlanDetail {
-  id: string;
-  buildingName: string;
-  floorLabel: string;
-  floorName: string;
-  rooms: FloorPlanRoom[];
+  /** 台账统一字段 */
+  installLocation?: string;
+  integrationAddress?: string;
+  serialNo?: string;
+  channelNo?: string;
+  bindingStatus?: string;
+  brand?: string;
+  model?: string;
 }
 
 export interface FloorDeviceTypeStat {

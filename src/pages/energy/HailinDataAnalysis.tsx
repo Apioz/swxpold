@@ -39,9 +39,9 @@ export default function HailinDataAnalysis() {
         title: code,
         children: [
           {
-            title: '瞬时',
+            title: '瞬时(m³/h)',
             key: `${code}-instant`,
-            width: 80,
+            width: 96,
             align: 'right',
             render: (_, record) => {
               const v = record.readings[code]?.instant;
@@ -49,9 +49,9 @@ export default function HailinDataAnalysis() {
             },
           },
           {
-            title: '累计',
+            title: '累计(m³)',
             key: `${code}-cum`,
-            width: 80,
+            width: 96,
             align: 'right',
             render: (_, record) => {
               const v = record.readings[code]?.cumulative;

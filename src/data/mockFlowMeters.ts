@@ -30,11 +30,115 @@ function resolveStatus(indexNo: number): FlowMeterDevice['status'] {
   return 'online';
 }
 
+function resolveInstallLocation(raw: RawDevice): string {
+  const name = raw.name.trim();
+  if (raw.roomNo && name.startsWith(raw.roomNo)) {
+    return name;
+  }
+  return raw.roomNo ? `${raw.roomNo} ${name}` : name;
+}
+
+function enrichLedgerFields(
+  raw: RawDevice,
+  status: FlowMeterDevice['status'],
+): Partial<FlowMeterDevice> {
+  const installLocation = resolveInstallLocation(raw);
+  const bindingStatus = status === 'offline' ? '未绑定' : '已绑定';
+  const integrationFromIp = raw.ip
+    ? raw.deviceType === '门禁' || raw.deviceType === '门禁控制器'
+      ? `http://${raw.ip}:8000`
+      : `modbus://${raw.ip}:502`
+    : undefined;
+
+  if (raw.deviceType === '门禁') {
+    return {
+      installLocation,
+      integrationAddress: integrationFromIp,
+      serialNo: raw.code,
+      channelNo: String((raw.indexNo % 2) + 1),
+      bindingStatus,
+      brand: '海康威视',
+      model: 'DS-K1T320',
+      account: 'admin',
+      password: '******',
+    };
+  }
+
+  if (raw.deviceType === '门禁控制器') {
+    return {
+      installLocation,
+      integrationAddress: raw.ip ? `http://${raw.ip}:8000/api` : undefined,
+      serialNo: raw.code,
+      channelNo: raw.spec?.includes('四') ? '1-4' : '1-2',
+      bindingStatus,
+      brand: '海康威视',
+      model: raw.spec ?? '双门控制器',
+      account: 'admin',
+      password: '******',
+    };
+  }
+
+  if (raw.deviceType === '摄像头') {
+    return {
+      installLocation,
+      integrationAddress: raw.ip ? `rtsp://${raw.ip}:554` : undefined,
+      serialNo: raw.code,
+      channelNo: String(raw.indexNo),
+      bindingStatus,
+      brand: '海康威视',
+      model: 'DS-2CD3T86',
+      account: raw.account ?? 'admin',
+      password: raw.password ?? '******',
+    };
+  }
+
+  if (raw.deviceType === '会议屏') {
+    return {
+      installLocation,
+      integrationAddress: raw.ip ? `http://${raw.ip}` : undefined,
+      serialNo: raw.mac ?? raw.code,
+      channelNo: '-',
+      bindingStatus,
+      brand: 'MAXHUB',
+      model: 'ME65',
+      account: '-',
+      password: '-',
+    };
+  }
+
+  const typeMeta: Partial<
+    Record<FacilityDeviceType, { brand: string; model: string; integration?: string }>
+  > = {
+    纯水流量计: { brand: 'E+H', model: 'Promag 50', integration: 'modbus' },
+    压差计: { brand: 'Setra', model: '267', integration: 'modbus' },
+    电表: { brand: '正泰', model: 'DTSU666', integration: 'modbus' },
+    温湿度传感器: { brand: '霍尼韦尔', model: 'HHT1', integration: 'modbus' },
+    氧浓度: { brand: 'Teledyne', model: 'M400', integration: 'modbus' },
+  };
+
+  const meta = typeMeta[raw.deviceType];
+  return {
+    installLocation,
+    integrationAddress:
+      integrationFromIp ??
+      (raw.gateway ? `gateway://${raw.gateway}` : undefined) ??
+      (meta?.integration && raw.ip ? `${meta.integration}://${raw.ip}:502` : undefined),
+    serialNo: raw.code,
+    channelNo: '-',
+    bindingStatus,
+    brand: meta?.brand ?? '-',
+    model: meta?.model ?? '-',
+    account: '-',
+    password: '-',
+  };
+}
+
 function enrich(raw: RawDevice, globalIndex: number): FlowMeterDevice {
   const pos = resolveMapPosition(raw.roomNo, raw.indexNo);
   const status = resolveStatus(globalIndex);
   return {
     ...raw,
+    ...enrichLedgerFields(raw, status),
     id: `${raw.deviceType}-${raw.indexNo}-${globalIndex}`,
     floorId: resolveFloorId(raw.roomNo),
     ...pos,
