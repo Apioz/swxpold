@@ -1,0 +1,23 @@
+.platform-switcher-btn {
+  border: none;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.platform-switcher-btn:hover {
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.06);
+}
+
+.platform-switcher-dropdown .ant-dropdown-menu-item-disabled {
+  color: #1890ff !important;
+  font-weight: 600;
+}

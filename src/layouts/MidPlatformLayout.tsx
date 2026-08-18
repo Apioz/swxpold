@@ -6,7 +6,6 @@ import {
   FullscreenOutlined,
   LockOutlined,
   MenuFoldOutlined,
-  MonitorOutlined,
   ReloadOutlined,
   SkinOutlined,
 } from '@ant-design/icons';
@@ -17,6 +16,7 @@ import {
   midPlatformMenuItems,
   midPlatformRouteTitleMap,
 } from '../config/midPlatformMenu';
+import PlatformSwitcher from '../components/PlatformSwitcher';
 import './MidPlatformLayout.css';
 
 const { Sider, Header, Content } = Layout;
@@ -133,7 +133,7 @@ export default function MidPlatformLayout() {
           <LockOutlined className="mid-platform-header-icon" />
           <ReloadOutlined className="mid-platform-header-icon" />
           <FullscreenOutlined className="mid-platform-header-icon" />
-          <MonitorOutlined className="mid-platform-header-icon" />
+          <PlatformSwitcher className="mid-platform-platform-switch" />
           <BellOutlined className="mid-platform-header-icon" />
           <Dropdown menu={{ items: [{ key: '1', label: '退出登录' }] }}>
             <div className="mid-platform-user">

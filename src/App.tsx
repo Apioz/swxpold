@@ -21,6 +21,15 @@ import AccessRecognitionRecords from './pages/security/access-control/AccessReco
 import HailinMeterLedger from './pages/energy/HailinMeterLedger';
 import HailinNetworkMonitor from './pages/energy/HailinNetworkMonitor';
 import HailinDataAnalysis from './pages/energy/HailinDataAnalysis';
+import MiniProgramLayout from './layouts/MiniProgramLayout';
+import MiniProgramHome from './pages/mini-program/MiniProgramHome';
+import MeetingRoomHome from './pages/mini-program/meeting-room/MeetingRoomHome';
+import MeetingRoomList from './pages/mini-program/meeting-room/MeetingRoomList';
+import MeetingRoomBook from './pages/mini-program/meeting-room/MeetingRoomBook';
+import MeetingParticipantPicker from './pages/mini-program/meeting-room/MeetingParticipantPicker';
+import MeetingReservationDetail from './pages/mini-program/meeting-room/MeetingReservationDetail';
+import MyReservations from './pages/mini-program/meeting-room/MyReservations';
+import MeetingAudit from './pages/mini-program/meeting-room/MeetingAudit';
 import MidPlatformPersonnelManagement from './pages/mid-platform/operations/PersonnelManagement';
 import OperationsHome from './pages/mid-platform/operations/OperationsHome';
 import './App.css';
@@ -223,6 +232,17 @@ function App() {
               path="operations/personnel"
               element={<MidPlatformPersonnelManagement />}
             />
+          </Route>
+          <Route path="/mini-program" element={<MiniProgramLayout />}>
+            <Route index element={<Navigate to="/mini-program/home" replace />} />
+            <Route path="home" element={<MiniProgramHome />} />
+            <Route path="meeting-room" element={<MeetingRoomHome />} />
+            <Route path="meeting-room/list" element={<MeetingRoomList />} />
+            <Route path="meeting-room/book/:roomId" element={<MeetingRoomBook />} />
+            <Route path="meeting-room/book/:roomId/participants" element={<MeetingParticipantPicker />} />
+            <Route path="meeting-room/reservation/:reservationId" element={<MeetingReservationDetail />} />
+            <Route path="meeting-room/my-reservations" element={<MyReservations />} />
+            <Route path="meeting-room/audit" element={<MeetingAudit />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -19,6 +19,7 @@ import {
   ToolOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
+import PlatformSwitcher from '../components/PlatformSwitcher';
 import './MainLayout.css';
 import { getEnergyOpenKeys, energyMenuChildren, energyRouteTitleMap } from '../config/energyMenu';
 
@@ -279,7 +280,12 @@ export default function MainLayout() {
               closable: t.closable,
             }))}
             className="header-tabs"
-            tabBarExtraContent={<span className="more-btn">更多</span>}
+            tabBarExtraContent={
+              <div className="main-header-extra">
+                <PlatformSwitcher />
+                <span className="more-btn">更多</span>
+              </div>
+            }
           />
         </Header>
         <Content className="main-content">
