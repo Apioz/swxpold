@@ -30,8 +30,12 @@ import MeetingParticipantPicker from './pages/mini-program/meeting-room/MeetingP
 import MeetingReservationDetail from './pages/mini-program/meeting-room/MeetingReservationDetail';
 import MyReservations from './pages/mini-program/meeting-room/MyReservations';
 import MeetingAudit from './pages/mini-program/meeting-room/MeetingAudit';
+import MeetingRoomDoorPanel from './pages/meeting-room-door/MeetingRoomDoorPanel';
 import MidPlatformPersonnelManagement from './pages/mid-platform/operations/PersonnelManagement';
 import OperationsHome from './pages/mid-platform/operations/OperationsHome';
+import FoundationLayout from './layouts/FoundationLayout';
+import SpaceCenter from './pages/foundation/space-center/SpaceCenter';
+import FoundationPlaceholder from './pages/foundation/FoundationPlaceholder';
 import './App.css';
 
 function App() {
@@ -233,6 +237,21 @@ function App() {
               element={<MidPlatformPersonnelManagement />}
             />
           </Route>
+          <Route path="/foundation" element={<FoundationLayout />}>
+            <Route index element={<Navigate to="/foundation/space-center" replace />} />
+            <Route path="space-center" element={<SpaceCenter />} />
+            <Route path="project-center" element={<FoundationPlaceholder title="项目中心" />} />
+            <Route path="model-center" element={<FoundationPlaceholder title="模型中心" />} />
+            <Route path="device-center" element={<FoundationPlaceholder title="设备中心" />} />
+            <Route path="floor-manage" element={<FoundationPlaceholder title="全层管理" />} />
+            <Route path="document-center" element={<FoundationPlaceholder title="文档中心" />} />
+            <Route path="source-center" element={<FoundationPlaceholder title="源码中心" />} />
+            <Route path="collaboration-center" element={<FoundationPlaceholder title="协同中心" />} />
+            <Route path="iot/devices" element={<FoundationPlaceholder title="设备接入" />} />
+            <Route path="system/users" element={<FoundationPlaceholder title="用户管理" />} />
+            <Route path="service/logs" element={<FoundationPlaceholder title="服务日志" />} />
+          </Route>
+          <Route path="/meeting-room-door/:roomId?" element={<MeetingRoomDoorPanel />} />
           <Route path="/mini-program" element={<MiniProgramLayout />}>
             <Route index element={<Navigate to="/mini-program/home" replace />} />
             <Route path="home" element={<MiniProgramHome />} />

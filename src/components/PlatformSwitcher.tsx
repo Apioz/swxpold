@@ -1,4 +1,4 @@
-import { DesktopOutlined, MobileOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { DesktopOutlined, MobileOutlined, AppstoreOutlined, ClusterOutlined } from '@ant-design/icons';
 import { Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import './PlatformSwitcher.css';
 const platformIcons: Record<PlatformId, React.ReactNode> = {
   pc: <DesktopOutlined />,
   'mid-platform': <AppstoreOutlined />,
+  foundation: <ClusterOutlined />,
   'mini-program': <MobileOutlined />,
 };
 

@@ -9,15 +9,15 @@ import {
   ReloadOutlined,
   SkinOutlined,
 } from '@ant-design/icons';
-import { Avatar, Dropdown, Layout, Menu, Tabs } from 'antd';
+import { Avatar, Dropdown, Layout, Menu, Select, Tabs } from 'antd';
 import type { MenuProps } from 'antd';
 import {
-  getMidPlatformOpenKeys,
-  midPlatformMenuItems,
-  midPlatformRouteTitleMap,
-} from '../config/midPlatformMenu';
+  foundationMenuItems,
+  foundationRouteTitleMap,
+  getFoundationOpenKeys,
+} from '../config/foundationMenu';
 import PlatformSwitcher from '../components/PlatformSwitcher';
-import './MidPlatformLayout.css';
+import './FoundationLayout.css';
 
 const { Sider, Header, Content } = Layout;
 
@@ -27,23 +27,23 @@ interface TabItem {
   closable?: boolean;
 }
 
-function MenuGridIcon() {
+function MenuDotIcon() {
   return (
-    <span className="mid-platform-menu-grid-icon" aria-hidden>
+    <span className="foundation-menu-dot-icon" aria-hidden>
       <i /><i /><i /><i />
     </span>
   );
 }
 
-const menuItemsWithIcons: MenuProps['items'] = midPlatformMenuItems.map((item) => {
+const menuItemsWithIcons: MenuProps['items'] = foundationMenuItems.map((item) => {
   if (!item || typeof item !== 'object' || !('label' in item)) return item;
-  const withIcon = { ...item, icon: <MenuGridIcon /> };
+  const withIcon = { ...item, icon: <MenuDotIcon /> };
   if ('children' in item && item.children) {
     return {
       ...withIcon,
       children: item.children.map((child) =>
         child && typeof child === 'object' && 'label' in child
-          ? { ...child, icon: <MenuGridIcon /> }
+          ? { ...child, icon: <MenuDotIcon /> }
           : child,
       ),
     };
@@ -51,26 +51,21 @@ const menuItemsWithIcons: MenuProps['items'] = midPlatformMenuItems.map((item) =
   return withIcon;
 });
 
-export default function MidPlatformLayout() {
+export default function FoundationLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>(['mid-operations']);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [tabs, setTabs] = useState<TabItem[]>([
-    { key: '/mid-platform/operations/home', label: '运营管理首页', closable: true },
-    { key: '/mid-platform/operations/personnel', label: '人员管理', closable: true },
+    { key: '/foundation/project-center', label: '项目中心', closable: true },
+    { key: '/foundation/space-center', label: '空间中心', closable: true },
   ]);
 
-  const selectedKeys = useMemo(() => {
-    if (location.pathname.startsWith('/mid-platform/operations/personnel')) {
-      return ['/mid-platform/operations/personnel'];
-    }
-    return [location.pathname];
-  }, [location.pathname]);
+  const selectedKeys = useMemo(() => [location.pathname], [location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;
-    const title = midPlatformRouteTitleMap[path];
+    const title = foundationRouteTitleMap[path];
     if (!title) return;
 
     setTabs((prev) => {
@@ -78,13 +73,11 @@ export default function MidPlatformLayout() {
       return [...prev, { key: path, label: title, closable: true }];
     });
 
-    setOpenKeys((prev) => [...new Set([...prev, ...getMidPlatformOpenKeys(path)])]);
+    setOpenKeys((prev) => [...new Set([...prev, ...getFoundationOpenKeys(path)])]);
   }, [location.pathname]);
 
   const onMenuClick: MenuProps['onClick'] = ({ key }) => {
-    if (key.startsWith('/')) {
-      navigate(key);
-    }
+    if (key.startsWith('/')) navigate(key);
   };
 
   const onTabChange = (key: string) => {
@@ -109,45 +102,54 @@ export default function MidPlatformLayout() {
   };
 
   return (
-    <Layout className="mid-platform-layout">
-      <Header className="mid-platform-topbar">
-        <div className="mid-platform-topbar-left">
+    <Layout className="foundation-layout">
+      <Header className="foundation-topbar">
+        <div className="foundation-topbar-left">
           <button
             type="button"
-            className="mid-platform-icon-btn"
+            className="foundation-icon-btn"
             onClick={() => setCollapsed((v) => !v)}
             aria-label="切换菜单"
           >
             <MenuFoldOutlined />
           </button>
-          <span className="mid-platform-system-title">运营管理</span>
+          <span className="foundation-system-title">生物芯片智慧园区</span>
         </div>
-        <div className="mid-platform-topbar-right">
-          <SkinOutlined className="mid-platform-header-icon" />
-          <LockOutlined className="mid-platform-header-icon" />
-          <ReloadOutlined className="mid-platform-header-icon" />
-          <FullscreenOutlined className="mid-platform-header-icon" />
-          <PlatformSwitcher className="mid-platform-platform-switch" />
-          <BellOutlined className="mid-platform-header-icon" />
+        <div className="foundation-topbar-right">
+          <Select
+            className="foundation-park-select"
+            defaultValue="biochip-park"
+            options={[{ label: '生物芯片智慧园区', value: 'biochip-park' }]}
+            suffixIcon={<DownOutlined />}
+          />
+          <SkinOutlined className="foundation-header-icon" />
+          <LockOutlined className="foundation-header-icon" />
+          <ReloadOutlined className="foundation-header-icon" />
+          <FullscreenOutlined className="foundation-header-icon" />
+          <PlatformSwitcher className="foundation-platform-switch" />
+          <BellOutlined className="foundation-header-icon" />
           <Dropdown menu={{ items: [{ key: '1', label: '退出登录' }] }}>
-            <div className="mid-platform-user">
-              <Avatar size={28} className="mid-platform-user-avatar">
+            <div className="foundation-user">
+              <Avatar size={28} className="foundation-user-avatar">
                 管
               </Avatar>
               <span>管理员</span>
-              <DownOutlined className="mid-platform-user-arrow" />
+              <DownOutlined className="foundation-user-arrow" />
             </div>
           </Dropdown>
+          <button type="button" className="foundation-business-btn">
+            业务
+          </button>
         </div>
       </Header>
 
-      <Layout className="mid-platform-body">
+      <Layout className="foundation-body">
         <Sider
           collapsed={collapsed}
           width={210}
           collapsedWidth={0}
           trigger={null}
-          className="mid-platform-sider"
+          className="foundation-sider"
         >
           <Menu
             mode="inline"
@@ -156,12 +158,12 @@ export default function MidPlatformLayout() {
             onOpenChange={setOpenKeys}
             onClick={onMenuClick}
             items={menuItemsWithIcons}
-            className="mid-platform-menu"
+            className="foundation-menu"
           />
         </Sider>
 
-        <Layout className="mid-platform-main">
-          <div className="mid-platform-tabbar">
+        <Layout className="foundation-main">
+          <div className="foundation-tabbar">
             <Tabs
               type="editable-card"
               hideAdd
@@ -173,12 +175,12 @@ export default function MidPlatformLayout() {
                 label: t.label,
                 closable: t.closable,
               }))}
-              className="mid-platform-tabs"
+              className="foundation-tabs"
             />
-            <span className="mid-platform-more-btn">更多</span>
+            <span className="foundation-more-btn">更多</span>
           </div>
 
-          <Content className="mid-platform-content">
+          <Content className="foundation-content">
             <Outlet />
           </Content>
         </Layout>

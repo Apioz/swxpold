@@ -60,7 +60,6 @@ const routeTitleMap: Record<string, string> = {
   '/project': '项目管理',
   '/system': '系统管理',
   '/task': '任务管理',
-  '/mid-platform-entry': '生物芯片中台',
 };
 
 const menuItems: MenuItem[] = [
@@ -139,7 +138,6 @@ const menuItems: MenuItem[] = [
   { key: '/project', icon: <ProjectOutlined />, label: '项目管理' },
   { key: '/system', icon: <SettingOutlined />, label: '系统管理' },
   { key: '/task', icon: <UnorderedListOutlined />, label: '任务管理' },
-  { key: '/mid-platform/operations/personnel', icon: <AppstoreOutlined />, label: '生物芯片中台' },
 ];
 
 interface TabItem {

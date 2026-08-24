@@ -1,0 +1,57 @@
+.door-panel--export {
+  min-height: 100vh;
+  min-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f2fb;
+  overflow: auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.door-panel__frame {
+  position: relative;
+  width: min(100%, 1024px);
+}
+
+.door-panel__export-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 12px 40px rgba(36, 72, 120, 0.12);
+}
+
+.door-panel__live-clock,
+.door-panel__live-date {
+  position: absolute;
+  left: 3.52%;
+  color: #22304a;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.door-panel__live-clock {
+  top: 13.75%;
+  font-size: clamp(28px, 5.1vw, 52px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.door-panel__live-date {
+  top: 23.1%;
+  font-size: clamp(11px, 1.45vw, 15px);
+  color: #5a6d8a;
+}
+
+.door-panel--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #eef4fb;
+  font-size: 24px;
+  color: #1a2744;
+}
