@@ -57,7 +57,7 @@ function resolvePhotoUrl(room: MidPlatformMeetingRoom): string {
 export function midPlatformRoomToMiniProgramDetail(
   room: MidPlatformMeetingRoom,
 ): MeetingRoomDetail | null {
-  if (!room.enabled) return null;
+  if (room.status === 'disabled') return null;
 
   const floorPlanId = inferFloorPlanId(room);
   const planPoint = room.planPoint;
@@ -91,10 +91,10 @@ export function getManagedMeetingRoomDetailById(id: string): MeetingRoomDetail |
 }
 
 export function buildManagedMeetingRoomTree(): MeetingRoomNode[] {
-  const enabledRooms = getMeetingRooms().filter((room) => room.enabled);
+  const activeRooms = getMeetingRooms().filter((room) => room.status !== 'disabled');
   const buildingMap = new Map<string, Map<string, MidPlatformMeetingRoom[]>>();
 
-  enabledRooms.forEach((room) => {
+  activeRooms.forEach((room) => {
     const building = resolveBuilding(room);
     const floor = resolveFloor(room) || '未分层';
     if (!buildingMap.has(building)) buildingMap.set(building, new Map());
@@ -154,7 +154,7 @@ export function getManagedRoomsByFloorPlan(floorPlanId: string): MeetingRoomDeta
   return getMeetingRooms()
     .filter(
       (room) =>
-        room.enabled &&
+        room.status !== 'disabled' &&
         inferFloorPlanId(room) === floorPlanId &&
         room.planPoint,
     )

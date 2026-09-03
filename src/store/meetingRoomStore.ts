@@ -1,14 +1,24 @@
 import { useSyncExternalStore } from 'react';
-import type { MidPlatformMeetingRoom } from '../types/midPlatformMeetingRoom';
+import type { MidPlatformMeetingRoom, MeetingRoomStatus } from '../types/midPlatformMeetingRoom';
 import { midPlatformMeetingRooms } from '../data/mockMidPlatformMeetingRooms';
 import { clearPersisted, loadPersisted, savePersisted } from '../utils/persistStore';
 
 const STORAGE_KEY = 'sw.meeting-rooms';
 
+type LegacyMeetingRoom = MidPlatformMeetingRoom & { enabled?: boolean };
+
+/** 兼容旧数据：enabled 布尔值迁移为 status */
+function normalizeMeetingRoom(room: LegacyMeetingRoom): MidPlatformMeetingRoom {
+  if (room.status) return room;
+  const { enabled, ...rest } = room;
+  const status: MeetingRoomStatus = enabled === false ? 'disabled' : 'enabled';
+  return { ...rest, status };
+}
+
 let rooms: MidPlatformMeetingRoom[] = loadPersisted(
   STORAGE_KEY,
   structuredClone(midPlatformMeetingRooms),
-);
+).map(normalizeMeetingRoom);
 const listeners = new Set<() => void>();
 
 function emit() {

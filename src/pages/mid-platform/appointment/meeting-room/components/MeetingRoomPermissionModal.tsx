@@ -1,48 +1,49 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Button, Input, Modal, Radio, Space, Tree } from 'antd';
-import type { DataNode } from 'antd/es/tree';
-import type { MeetingRoomPermissionNode } from '../../../../../types/midPlatformMeetingRoom';
-import {
-  filterMeetingRoomPermissionTree,
-  meetingRoomPermissionTree,
-} from '../../../../../data/mockMidPlatformMeetingRooms';
+import { Button, Modal, Radio, Space, message } from 'antd';
+import type { MeetingRoomUsagePermission } from '../../../../../types/midPlatformMeetingRoom';
+import MeetingRoomAuthorizedUsersPicker from './MeetingRoomAuthorizedUsersPicker';
+
+export interface MeetingRoomPermissionResult {
+  usagePermission: MeetingRoomUsagePermission;
+  authorizedUserIds: string[];
+}
 
 interface MeetingRoomPermissionModalProps {
   open: boolean;
+  initialUsagePermission?: MeetingRoomUsagePermission;
+  initialAuthorizedUserIds?: string[];
   onCancel: () => void;
-  onSubmit: () => void;
-}
-
-function toTreeData(nodes: MeetingRoomPermissionNode[]): DataNode[] {
-  return nodes.map((node) => ({
-    key: node.id,
-    title: node.name,
-    children: node.children ? toTreeData(node.children) : undefined,
-    disableCheckbox: node.type !== 'person',
-    selectable: false,
-  }));
+  onConfirm: (result: MeetingRoomPermissionResult) => void;
 }
 
 export default function MeetingRoomPermissionModal({
   open,
+  initialUsagePermission = 'restricted',
+  initialAuthorizedUserIds = [],
   onCancel,
-  onSubmit,
+  onConfirm,
 }: MeetingRoomPermissionModalProps) {
-  const [usagePermission, setUsagePermission] = useState<'unlimited' | 'restricted'>('restricted');
-  const [keyword, setKeyword] = useState('');
-  const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [usagePermission, setUsagePermission] =
+    useState<MeetingRoomUsagePermission>(initialUsagePermission);
+  const [authorizedUserIds, setAuthorizedUserIds] = useState<string[]>(initialAuthorizedUserIds);
 
   useEffect(() => {
     if (!open) return;
-    setExpandedKeys([]);
-  }, [open]);
+    setUsagePermission(initialUsagePermission);
+    setAuthorizedUserIds(initialAuthorizedUserIds);
+  }, [open, initialUsagePermission, initialAuthorizedUserIds]);
 
-  const treeData = useMemo(
-    () => toTreeData(filterMeetingRoomPermissionTree(meetingRoomPermissionTree, keyword)),
-    [keyword],
-  );
+  const handleSubmit = () => {
+    if (usagePermission === 'restricted' && authorizedUserIds.length === 0) {
+      message.warning('限制人群使用时，请至少选择一名授权用户');
+      return;
+    }
+    onConfirm({
+      usagePermission,
+      authorizedUserIds: usagePermission === 'restricted' ? authorizedUserIds : [],
+    });
+  };
 
   return (
     <Modal
@@ -53,7 +54,7 @@ export default function MeetingRoomPermissionModal({
       destroyOnHidden
       footer={
         <Space>
-          <Button type="primary" icon={<CheckOutlined />} onClick={onSubmit}>
+          <Button type="primary" icon={<CheckOutlined />} onClick={handleSubmit}>
             提交
           </Button>
           <Button icon={<CloseOutlined />} onClick={onCancel}>
@@ -68,7 +69,11 @@ export default function MeetingRoomPermissionModal({
           <span className="mid-platform-permission-label">使用权限</span>
           <Radio.Group
             value={usagePermission}
-            onChange={(e) => setUsagePermission(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value as MeetingRoomUsagePermission;
+              setUsagePermission(next);
+              if (next === 'unlimited') setAuthorizedUserIds([]);
+            }}
           >
             <Radio value="unlimited">不限</Radio>
             <Radio value="restricted">限制人群使用</Radio>
@@ -77,24 +82,10 @@ export default function MeetingRoomPermissionModal({
         {usagePermission === 'restricted' && (
           <div className="mid-platform-permission-row mid-platform-permission-users">
             <span className="mid-platform-permission-label">授权用户</span>
-            <div className="mid-platform-permission-tree-wrap">
-              <Input
-                placeholder="请输入用户名搜索"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                allowClear
-                className="mid-platform-permission-search"
-              />
-              <Tree
-                checkable
-                treeData={treeData}
-                expandedKeys={expandedKeys}
-                onExpand={(keys) => setExpandedKeys(keys as string[])}
-                checkedKeys={checkedKeys}
-                onCheck={(keys) => setCheckedKeys(keys as string[])}
-                className="mid-platform-permission-tree"
-              />
-            </div>
+            <MeetingRoomAuthorizedUsersPicker
+              value={authorizedUserIds}
+              onChange={setAuthorizedUserIds}
+            />
           </div>
         )}
       </div>

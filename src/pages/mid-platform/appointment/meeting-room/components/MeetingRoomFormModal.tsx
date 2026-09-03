@@ -10,18 +10,16 @@ import {
   PictureOutlined,
   SaveOutlined,
   UploadOutlined,
+  UserSwitchOutlined,
 } from '@ant-design/icons';
 import {
   Button,
-  Checkbox,
   Form,
   Input,
   InputNumber,
   Modal,
   Radio,
   Select,
-  Space,
-  Switch,
   Tag,
   message,
 } from 'antd';
@@ -40,6 +38,7 @@ import {
 import DocumentImagePickerModal from '../../../../../components/foundation/DocumentImagePickerModal';
 import DocumentFloorPlanPickerModal from '../../../../../components/foundation/DocumentFloorPlanPickerModal';
 import FloorPlanPointModal from '../../../../../components/foundation/FloorPlanPointModal';
+import MeetingRoomPermissionModal from './MeetingRoomPermissionModal';
 import {
   getFloorPlan,
   useMeetingRoomFloorPlanStore,
@@ -90,6 +89,8 @@ export default function MeetingRoomFormModal({
   const [openPointAfterFloorPlan, setOpenPointAfterFloorPlan] = useState(false);
   const [cover, setCover] = useState<MeetingRoomCoverSelection | null>(null);
   const [planPoint, setPlanPoint] = useState<MeetingRoomPlanPoint | null>(null);
+  const [authorizedUserIds, setAuthorizedUserIds] = useState<string[]>([]);
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -103,9 +104,9 @@ export default function MeetingRoomFormModal({
         name: record.name,
         area: record.area,
         capacity: record.capacity,
-        enabled: record.enabled,
+        status: record.status,
         usagePermission: record.usagePermission,
-        equipment: record.equipment,
+        equipment: record.equipment[0],
         screenDevice: record.screenDevice.includes('、')
           ? record.screenDevice.split('、')[0]?.trim() ?? record.screenDevice
           : record.screenDevice,
@@ -113,20 +114,25 @@ export default function MeetingRoomFormModal({
       });
       setCover(record.cover ?? null);
       setPlanPoint(record.planPoint ?? null);
+      setAuthorizedUserIds(record.authorizedUserIds ?? []);
     } else {
       form.resetFields();
       form.setFieldsValue({
-        enabled: true,
+        status: 'enabled',
         usagePermission: 'unlimited',
-        equipment: [],
       });
       setCover(null);
       setPlanPoint(null);
+      setAuthorizedUserIds([]);
     }
   }, [open, mode, record, form]);
 
   const address = Form.useWatch('address', form) as string | undefined;
   const spaceLocation = Form.useWatch('spaceLocation', form) as string | undefined;
+  const usagePermission = Form.useWatch('usagePermission', form) as
+    | MidPlatformMeetingRoom['usagePermission']
+    | undefined;
+  const roomStatus = Form.useWatch('status', form) as MidPlatformMeetingRoom['status'] | undefined;
 
   const floorCtx = useMemo(
     () =>
@@ -146,7 +152,15 @@ export default function MeetingRoomFormModal({
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      onSubmit({ ...values, cover, planPoint });
+      if (
+        values.status !== 'disabled' &&
+        values.usagePermission === 'restricted' &&
+        authorizedUserIds.length === 0
+      ) {
+        message.warning('限制人群使用时，请至少选择一名授权用户');
+        return;
+      }
+      onSubmit({ ...values, cover, planPoint, authorizedUserIds });
     } catch {
       /* validation */
     }
@@ -388,31 +402,69 @@ export default function MeetingRoomFormModal({
           <section className="meeting-room-form-section">
             <div className="meeting-room-form-section-title">预约配置</div>
             <div className="meeting-room-form-grid">
-              <Form.Item label="状态" name="enabled" valuePropName="checked">
-                <Space className="meeting-room-switch-wrap">
-                  <span className="mid-platform-switch-label">禁用</span>
-                  <Switch />
-                  <span className="mid-platform-switch-label">启用</span>
-                </Space>
-              </Form.Item>
-              <Form.Item label="使用权限" name="usagePermission">
-                <Radio.Group>
-                  <Radio value="unlimited">不限</Radio>
-                  <Radio value="restricted">限制人群使用</Radio>
+              <Form.Item label="状态" name="status" className="full-width">
+                <Radio.Group
+                  onChange={(e) => {
+                    if (e.target.value === 'disabled') {
+                      setAuthorizedUserIds([]);
+                    }
+                  }}
+                >
+                  <Radio value="disabled">禁用</Radio>
+                  <Radio value="enabled">启用</Radio>
+                  <Radio value="idle">空闲</Radio>
                 </Radio.Group>
               </Form.Item>
+              {roomStatus === 'idle' && (
+                <div className="meeting-room-idle-notice full-width">
+                  <Tag color="success" className="meeting-room-idle-tag">
+                    空闲
+                  </Tag>
+                  <span className="meeting-room-idle-desc">
+                    空闲状态下不限制人员进出，任何人都可通过扫脸开启使用
+                  </span>
+                </div>
+              )}
+              {roomStatus !== 'disabled' && (
+                <>
+                  <Form.Item label="使用权限" name="usagePermission">
+                    <Radio.Group
+                      onChange={(e) => {
+                        if (e.target.value === 'unlimited') {
+                          setAuthorizedUserIds([]);
+                        }
+                      }}
+                    >
+                      <Radio value="unlimited">不限</Radio>
+                      <Radio value="restricted">限制人群使用</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  {usagePermission === 'restricted' && (
+                    <Form.Item label="授权用户" className="full-width">
+                      <Button
+                        type="link"
+                        icon={<UserSwitchOutlined />}
+                        className="meeting-room-permission-link"
+                        onClick={() => setPermissionModalOpen(true)}
+                      >
+                        设置使用权限
+                      </Button>
+                    </Form.Item>
+                  )}
+                </>
+              )}
               <Form.Item label="设备" name="equipment" className="full-width">
-                <Checkbox.Group className="mid-platform-equipment-group">
+                <Radio.Group className="mid-platform-equipment-group">
                   {MEETING_ROOM_EQUIPMENT_OPTIONS.map((item) => (
-                    <Checkbox
+                    <Radio
                       key={item.value}
                       value={item.value}
                       className="mid-platform-equipment-tag"
                     >
                       {equipmentIcons[item.value]} {item.label}
-                    </Checkbox>
+                    </Radio>
                   ))}
-                </Checkbox.Group>
+                </Radio.Group>
               </Form.Item>
               <Form.Item label="预约屏设备" name="screenDevice" className="full-width">
                 <Select
@@ -523,6 +575,18 @@ export default function MeetingRoomFormModal({
           }}
         />
       )}
+
+      <MeetingRoomPermissionModal
+        open={permissionModalOpen}
+        initialUsagePermission={usagePermission ?? 'restricted'}
+        initialAuthorizedUserIds={authorizedUserIds}
+        onCancel={() => setPermissionModalOpen(false)}
+        onConfirm={({ usagePermission: nextPermission, authorizedUserIds: nextUserIds }) => {
+          form.setFieldValue('usagePermission', nextPermission);
+          setAuthorizedUserIds(nextUserIds);
+          setPermissionModalOpen(false);
+        }}
+      />
     </>
   );
 }

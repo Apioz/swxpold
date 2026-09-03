@@ -5,7 +5,7 @@ import {
   DesktopOutlined,
   EnvironmentOutlined,
 } from '@ant-design/icons';
-import { Button, Modal, Radio, Space, Switch, Tag } from 'antd';
+import { Button, Modal, Radio, Space, Tag } from 'antd';
 import type {
   MeetingRoomEquipment,
   MidPlatformMeetingRoom,
@@ -118,22 +118,34 @@ export default function MeetingRoomViewModal({
               <ViewField
                 label="状态"
                 value={
-                  <Space className="meeting-room-switch-wrap">
-                    <span className="mid-platform-switch-label">禁用</span>
-                    <Switch checked={record.enabled} disabled />
-                    <span className="mid-platform-switch-label">启用</span>
-                  </Space>
-                }
-              />
-              <ViewField
-                label="使用权限"
-                value={
-                  <Radio.Group value={record.usagePermission} disabled>
-                    <Radio value="unlimited">不限</Radio>
-                    <Radio value="restricted">限制人群使用</Radio>
+                  <Radio.Group value={record.status} disabled>
+                    <Radio value="disabled">禁用</Radio>
+                    <Radio value="enabled">启用</Radio>
+                    <Radio value="idle">空闲</Radio>
                   </Radio.Group>
                 }
               />
+              {record.status === 'idle' && (
+                <div className="meeting-room-idle-notice full-width">
+                  <Tag color="success" className="meeting-room-idle-tag">
+                    空闲
+                  </Tag>
+                  <span className="meeting-room-idle-desc">
+                    空闲状态下不限制人员进出，任何人都可通过扫脸开启使用
+                  </span>
+                </div>
+              )}
+              {record.status !== 'disabled' && (
+                <ViewField
+                  label="使用权限"
+                  value={
+                    <Radio.Group value={record.usagePermission} disabled>
+                      <Radio value="unlimited">不限</Radio>
+                      <Radio value="restricted">限制人群使用</Radio>
+                    </Radio.Group>
+                  }
+                />
+              )}
               <ViewField
                 label="设备"
                 value={

@@ -21,13 +21,16 @@ import {
   Modal,
   Select,
   Space,
-  Switch,
   Table,
   Tag,
   message,
 } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import type { MidPlatformMeetingRoom } from '../../../../types/midPlatformMeetingRoom';
+import type {
+  MeetingRoomEquipment,
+  MeetingRoomStatus,
+  MidPlatformMeetingRoom,
+} from '../../../../types/midPlatformMeetingRoom';
 import {
   MEETING_ROOM_BUILDING_OPTIONS,
 } from '../../../../data/mockMidPlatformMeetingRooms';
@@ -38,6 +41,15 @@ import MeetingRoomPermissionModal from './components/MeetingRoomPermissionModal'
 import MeetingRoomAccessRecordModal from './components/MeetingRoomAccessRecordModal';
 import '../../MidPlatformPages.css';
 import './MeetingRoomList.css';
+
+const MEETING_ROOM_STATUS_META: Record<
+  MeetingRoomStatus,
+  { label: string; color: 'default' | 'success' | 'processing' }
+> = {
+  disabled: { label: '禁用', color: 'default' },
+  enabled: { label: '启用', color: 'success' },
+  idle: { label: '空闲', color: 'processing' },
+};
 
 interface SearchForm {
   building?: string;
@@ -81,10 +93,13 @@ export default function MeetingRoomList() {
       data = data.filter((item) => item.name.includes(search.name!.trim()));
     }
     if (search.status === 'enabled') {
-      data = data.filter((item) => item.enabled);
+      data = data.filter((item) => item.status === 'enabled');
     }
     if (search.status === 'disabled') {
-      data = data.filter((item) => !item.enabled);
+      data = data.filter((item) => item.status === 'disabled');
+    }
+    if (search.status === 'idle') {
+      data = data.filter((item) => item.status === 'idle');
     }
 
     return data;
@@ -104,7 +119,10 @@ export default function MeetingRoomList() {
   };
 
   const handleFormSubmit = (values: Record<string, unknown>) => {
-    const equipment = (values.equipment as MidPlatformMeetingRoom['equipment']) ?? [];
+    const equipmentValue = values.equipment as MeetingRoomEquipment | undefined;
+    const equipment: MidPlatformMeetingRoom['equipment'] = equipmentValue
+      ? [equipmentValue]
+      : [];
     const spaceLocation = values.spaceLocation as string;
     const building = spaceLocation.includes('1#')
       ? '综合办公楼1#'
@@ -123,8 +141,12 @@ export default function MeetingRoomList() {
         capacity: values.capacity as number,
         equipment,
         screenDevice: (values.screenDevice as string) ?? '',
-        enabled: Boolean(values.enabled),
+        status: values.status as MidPlatformMeetingRoom['status'],
         usagePermission: values.usagePermission as MidPlatformMeetingRoom['usagePermission'],
+        authorizedUserIds:
+          values.status !== 'disabled' && values.usagePermission === 'restricted'
+            ? ((values.authorizedUserIds as string[]) ?? [])
+            : [],
         description: values.description as string,
         building,
         cover: (values.cover as MidPlatformMeetingRoom['cover']) ?? null,
@@ -142,8 +164,12 @@ export default function MeetingRoomList() {
         capacity: values.capacity as number,
         equipment,
         screenDevice: (values.screenDevice as string) ?? '',
-        enabled: Boolean(values.enabled),
+        status: values.status as MidPlatformMeetingRoom['status'],
         usagePermission: values.usagePermission as MidPlatformMeetingRoom['usagePermission'],
+        authorizedUserIds:
+          values.status !== 'disabled' && values.usagePermission === 'restricted'
+            ? ((values.authorizedUserIds as string[]) ?? [])
+            : [],
         description: values.description as string,
         building,
         cover: (values.cover as MidPlatformMeetingRoom['cover']) ?? null,
@@ -208,19 +234,12 @@ export default function MeetingRoomList() {
     { title: '预约屏设备', dataIndex: 'screenDevice', width: 220 },
     {
       title: '状态',
-      dataIndex: 'enabled',
+      dataIndex: 'status',
       width: 100,
-      render: (enabled: boolean, record) => (
-        <Switch
-          checked={enabled}
-          checkedChildren="启用"
-          size="small"
-          className="mid-platform-meeting-status-switch"
-          onChange={(checked) => {
-            upsertMeetingRoom({ ...record, enabled: checked });
-          }}
-        />
-      ),
+      render: (status: MidPlatformMeetingRoom['status']) => {
+        const meta = MEETING_ROOM_STATUS_META[status];
+        return <Tag color={meta.color}>{meta.label}</Tag>;
+      },
     },
     {
       title: '操作',
@@ -275,6 +294,7 @@ export default function MeetingRoomList() {
               options={[
                 { label: '启用', value: 'enabled' },
                 { label: '禁用', value: 'disabled' },
+                { label: '空闲', value: 'idle' },
               ]}
             />
           </Form.Item>
@@ -354,7 +374,7 @@ export default function MeetingRoomList() {
       <MeetingRoomPermissionModal
         open={permissionOpen}
         onCancel={() => setPermissionOpen(false)}
-        onSubmit={() => {
+        onConfirm={() => {
           setPermissionOpen(false);
           message.success('提交成功');
         }}

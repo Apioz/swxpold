@@ -297,7 +297,6 @@
   display: none;
 }
 
-.mid-platform-equipment-group .mid-platform-equipment-tag.ant-checkbox-wrapper-checked,
 .mid-platform-equipment-group .mid-platform-equipment-tag.ant-radio-wrapper-checked {
   color: #1890ff;
   border-color: #1890ff;
@@ -386,6 +385,35 @@
   padding: 4px 0;
 }
 
+.meeting-room-idle-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: -4px;
+  margin-bottom: 4px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+}
+
+.meeting-room-idle-tag {
+  margin: 0;
+  font-size: 13px;
+}
+
+.meeting-room-idle-desc {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.meeting-room-permission-link {
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+}
+
 .mid-platform-permission-row {
   display: flex;
   align-items: flex-start;
@@ -400,6 +428,15 @@
 
 .mid-platform-permission-users {
   align-items: flex-start;
+}
+
+.mid-platform-permission-users-inline {
+  flex: 1;
+  min-width: 0;
+}
+
+.mid-platform-permission-users-inline .mid-platform-permission-search {
+  margin-bottom: 8px;
 }
 
 .mid-platform-permission-tree-wrap {
