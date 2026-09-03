@@ -1,0 +1,369 @@
+.doc-explorer {
+  display: flex;
+  gap: 0;
+  min-height: 420px;
+  border: 1px solid #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.doc-explorer-tree-panel {
+  width: 260px;
+  flex-shrink: 0;
+  border-right: 1px solid #f0f0f0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-explorer-tree-search {
+  margin: 12px;
+}
+
+.doc-explorer-tree-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0 0 12px;
+}
+
+.doc-explorer-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding-right: 8px;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 13px;
+}
+
+.doc-explorer-tree-node:hover,
+.doc-explorer-tree-node.is-selected {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.doc-explorer-tree-arrow {
+  width: 14px;
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+
+.doc-explorer-tree-arrow.is-placeholder {
+  visibility: hidden;
+}
+
+.doc-explorer-folder-icon {
+  color: #faad14;
+  flex-shrink: 0;
+}
+
+.doc-explorer-tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-explorer-list-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.doc-explorer-list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.doc-explorer-view-toggle {
+  display: flex;
+  gap: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 16px;
+}
+
+.doc-explorer-view-toggle .active {
+  color: #1890ff;
+}
+
+.doc-explorer-view-toggle .anticon {
+  cursor: pointer;
+}
+
+.doc-explorer-list-panel .ant-table-wrapper {
+  flex: 1;
+  padding: 0 12px;
+}
+
+.doc-explorer-file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doc-explorer-file-icon.folder {
+  color: #faad14;
+}
+
+.doc-explorer-file-icon.image {
+  color: #1890ff;
+}
+
+.doc-explorer-row-selected > td {
+  background: #e6f7ff !important;
+}
+
+.doc-explorer-path {
+  padding: 8px 12px;
+  border-top: 1px solid #f0f0f0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+
+.doc-explorer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 12px;
+  overflow: auto;
+  flex: 1;
+}
+
+.doc-explorer-grid-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 2px;
+  background: #fff;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.doc-explorer-grid-item:hover,
+.doc-explorer-grid-item.is-selected {
+  border-color: #1890ff;
+  background: #e6f7ff;
+}
+
+.doc-explorer-grid-item img {
+  width: 100%;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.doc-explorer-grid-folder {
+  font-size: 40px;
+  color: #faad14;
+  margin: 16px 0;
+}
+
+.doc-image-picker-preview {
+  width: 280px;
+  flex-shrink: 0;
+  border-left: 1px solid #f0f0f0;
+  padding: 16px;
+  background: #fafafa;
+}
+
+.doc-image-picker-preview-title {
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.doc-image-picker-preview img {
+  width: 100%;
+  border: 1px solid #f0f0f0;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.doc-image-picker-preview-meta {
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.doc-image-picker-body {
+  display: flex;
+  min-height: 460px;
+}
+
+.doc-image-picker-body .doc-explorer {
+  flex: 1;
+  border: none;
+  min-height: 460px;
+}
+
+.doc-floor-plan-picker-warning {
+  margin-top: 8px;
+  color: #ff4d4f;
+  font-size: 12px;
+}
+
+.doc-floor-plan-upload-layout {
+  display: flex;
+  gap: 16px;
+  min-height: 360px;
+}
+
+.doc-floor-plan-upload-dragger {
+  flex: 1;
+}
+
+.doc-floor-plan-upload-dragger .ant-upload-drag {
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.doc-floor-plan-upload-preview {
+  flex: 0 0 280px;
+  width: 280px;
+}
+
+.doc-floor-plan-file-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 160px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  background: #fafafa;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.doc-floor-plan-file-preview .anticon {
+  font-size: 32px;
+}
+
+.doc-floor-plan-picker-modal .ant-tabs-content {
+  padding-top: 4px;
+}
+
+.floor-plan-point-editor {
+  margin-top: 0;
+}
+
+.floor-plan-point-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+}
+
+.floor-plan-point-hint {
+  flex: 1;
+  min-width: 200px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1.5;
+}
+
+.floor-plan-point-canvas {
+  position: relative;
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: #fafafa;
+}
+
+.floor-plan-point-canvas.is-idle {
+  cursor: default;
+}
+
+.floor-plan-point-canvas img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.floor-plan-point-marker {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: #1890ff;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #1890ff;
+  pointer-events: none;
+}
+
+.floor-plan-point-marker::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 2px;
+  height: 10px;
+  margin-left: -1px;
+  background: #1890ff;
+}
+
+.meeting-room-cover-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.meeting-room-cover-preview {
+  width: 160px;
+  height: 90px;
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+.meeting-room-cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.meeting-room-cover-preview.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+}
+
+.meeting-room-cover-path {
+  flex: 1;
+  min-width: 200px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1.6;
+  word-break: break-all;
+}

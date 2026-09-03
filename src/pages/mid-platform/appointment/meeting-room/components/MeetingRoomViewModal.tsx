@@ -1,0 +1,181 @@
+import { useState } from 'react';
+import {
+  AudioOutlined,
+  BorderOutlined,
+  DesktopOutlined,
+  EnvironmentOutlined,
+} from '@ant-design/icons';
+import { Button, Modal, Radio, Space, Switch, Tag } from 'antd';
+import type {
+  MeetingRoomEquipment,
+  MidPlatformMeetingRoom,
+} from '../../../../../types/midPlatformMeetingRoom';
+import FloorPlanPointViewModal from '../../../../../components/foundation/FloorPlanPointViewModal';
+import { getFloorPlan } from '../../../../../store/meetingRoomFloorPlanStore';
+import { resolveMeetingRoomFloorContext } from '../../../../../utils/meetingRoomFloorContext';
+
+interface MeetingRoomViewModalProps {
+  open: boolean;
+  record: MidPlatformMeetingRoom | null;
+  onClose: () => void;
+}
+
+const equipmentIcons: Record<MeetingRoomEquipment, React.ReactNode> = {
+  投影仪: <DesktopOutlined />,
+  白板: <BorderOutlined />,
+  麦克风: <AudioOutlined />,
+};
+
+function ViewField({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="mid-platform-meeting-view-field">
+      <span className="mid-platform-meeting-view-label">{label}</span>
+      <span className="mid-platform-meeting-view-value">{value}</span>
+    </div>
+  );
+}
+
+export default function MeetingRoomViewModal({
+  open,
+  record,
+  onClose,
+}: MeetingRoomViewModalProps) {
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+
+  if (!record) return null;
+
+  const spaceLocation = record.spaceLocation.includes('|')
+    ? record.spaceLocation.split('|')[0]?.trim()
+    : record.spaceLocation;
+
+  const floorCtx = resolveMeetingRoomFloorContext({
+    building: record.building,
+    spaceLocation: record.spaceLocation,
+    address: record.address,
+    cover: record.cover,
+  });
+  const floorPlan = floorCtx ? getFloorPlan(floorCtx.building, floorCtx.floor) : undefined;
+
+  return (
+    <>
+      <Modal
+        title="查看"
+        open={open}
+        onCancel={onClose}
+        width={880}
+        destroyOnHidden
+        footer={null}
+        className="mid-platform-meeting-room-modal mid-platform-meeting-view-modal"
+      >
+        <div className="meeting-room-view-sections">
+          <section className="meeting-room-form-section">
+            <div className="meeting-room-form-section-title">基本信息</div>
+            <div className="mid-platform-meeting-view-grid">
+              <div className="meeting-room-view-grid">
+                <ViewField label="空间位置" value={spaceLocation} />
+                <ViewField label="地址" value={record.address} />
+                <ViewField label="会议室编号" value={record.roomNo} />
+                <ViewField label="会议室名称" value={record.name} />
+                <ViewField label="面积" value={`${record.area} m²`} />
+                <ViewField label="容纳人数" value={`${record.capacity} 人`} />
+              </div>
+            </div>
+          </section>
+
+          {record.cover && (
+            <section className="meeting-room-form-section">
+              <div className="meeting-room-form-section-title">封面与点位</div>
+              <div className="meeting-room-cover-panel has-cover">
+                <div className="meeting-room-cover-panel-media">
+                  <img src={record.cover.imageUrl} alt={record.cover.imageName} />
+                </div>
+                <div className="meeting-room-cover-panel-body">
+                  <div className="meeting-room-cover-panel-name">{record.cover.imageName}</div>
+                  <div className="meeting-room-cover-panel-path">{record.cover.documentPath}</div>
+                  <div className="meeting-room-cover-panel-meta">
+                    {record.cover.building} · {record.cover.floor}
+                  </div>
+                  <div className="meeting-room-cover-panel-actions">
+                    <Button
+                      icon={<EnvironmentOutlined />}
+                      onClick={() => setLocationModalOpen(true)}
+                      disabled={!floorPlan}
+                    >
+                      查看定位
+                    </Button>
+                    <Tag color={record.planPoint ? 'success' : 'default'}>
+                      {record.planPoint ? '已设置点位' : '未设置点位'}
+                    </Tag>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <section className="meeting-room-form-section">
+            <div className="meeting-room-form-section-title">预约配置</div>
+            <div className="mid-platform-meeting-view-grid meeting-room-view-config">
+              <ViewField
+                label="状态"
+                value={
+                  <Space className="meeting-room-switch-wrap">
+                    <span className="mid-platform-switch-label">禁用</span>
+                    <Switch checked={record.enabled} disabled />
+                    <span className="mid-platform-switch-label">启用</span>
+                  </Space>
+                }
+              />
+              <ViewField
+                label="使用权限"
+                value={
+                  <Radio.Group value={record.usagePermission} disabled>
+                    <Radio value="unlimited">不限</Radio>
+                    <Radio value="restricted">限制人群使用</Radio>
+                  </Radio.Group>
+                }
+              />
+              <ViewField
+                label="设备"
+                value={
+                  record.equipment.length > 0 ? (
+                    <Space wrap>
+                      {record.equipment.map((item) => (
+                        <Tag key={item} className="mid-platform-equipment-display-tag">
+                          {equipmentIcons[item]} {item}
+                        </Tag>
+                      ))}
+                    </Space>
+                  ) : (
+                    '-'
+                  )
+                }
+              />
+              <ViewField
+                label="预约屏设备"
+                value={
+                  record.screenDevice ? (
+                    <Tag className="mid-platform-screen-device-tag">{record.screenDevice}</Tag>
+                  ) : (
+                    '-'
+                  )
+                }
+              />
+              <ViewField label="描述" value={record.description?.trim() ? record.description : '-'} />
+            </div>
+          </section>
+        </div>
+      </Modal>
+
+      {floorPlan && floorCtx && (
+        <FloorPlanPointViewModal
+          open={locationModalOpen}
+          floorPlanUrl={floorPlan.imageUrl}
+          building={floorCtx.building}
+          floor={floorCtx.floor}
+          point={record.planPoint ?? null}
+          onClose={() => setLocationModalOpen(false)}
+        />
+      )}
+    </>
+  );
+}

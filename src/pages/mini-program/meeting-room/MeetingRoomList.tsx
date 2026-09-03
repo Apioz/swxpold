@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MpNavBar from '../components/MpNavBar';
 import {
   getMeetingRoomById,
-  meetingRoomTree,
+  getMeetingRoomTree,
   type MeetingRoomNode,
 } from '../../../data/mockMeetingRooms';
+import { useMeetingRoomStore } from '../../../store/meetingRoomStore';
+import { useMeetingRoomFloorPlanStore } from '../../../store/meetingRoomFloorPlanStore';
 import MeetingRoomFloorPlan from './components/MeetingRoomFloorPlan';
 import MeetingRoomPhoto from './components/MeetingRoomPhoto';
 import '../components/MiniProgramCommon.css';
@@ -79,9 +81,12 @@ function TreeBuilding({ building }: { building: MeetingRoomNode }) {
 }
 
 export default function MeetingRoomList() {
+  const [rooms] = useMeetingRoomStore();
+  const [floorPlanRecords] = useMeetingRoomFloorPlanStore();
   const [searchParams] = useSearchParams();
   const initialView = searchParams.get('view') === 'plan' ? 'plan' : 'list';
   const [viewMode, setViewMode] = useState<'list' | 'plan'>(initialView);
+  const meetingRoomTree = useMemo(() => getMeetingRoomTree(), [rooms, floorPlanRecords]);
 
   return (
     <div className="mp-page mp-tree-page">

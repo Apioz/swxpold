@@ -1,8 +1,11 @@
 import floorPlan5F from '../assets/floor-plan-5f-network.png';
+import { foundationFloorPlanUrls } from './foundationDocumentFloorPlans';
+import { getFloorPlanImageUrl } from '../utils/meetingRoomBridge';
 
 /** 楼层平面图资源映射（vite 静态导入） */
 export const meetingFloorPlanImages: Record<string, string> = {
   'b8-5f': floorPlan5F,
+  ...foundationFloorPlanUrls,
 };
 
 /** 4F / 3F 简版示意图（SVG inline） */
@@ -34,6 +37,8 @@ export const meetingFloorPlanSvg: Record<string, string> = {
 };
 
 export function getFloorPlanImageSrc(floorPlanId: string): string {
+  const fromStore = getFloorPlanImageUrl(floorPlanId);
+  if (fromStore) return fromStore;
   if (meetingFloorPlanImages[floorPlanId]) {
     return meetingFloorPlanImages[floorPlanId];
   }

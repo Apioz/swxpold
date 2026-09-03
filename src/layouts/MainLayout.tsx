@@ -21,7 +21,7 @@ import {
 } from '@ant-design/icons';
 import PlatformSwitcher from '../components/PlatformSwitcher';
 import './MainLayout.css';
-import { getEnergyOpenKeys, energyMenuChildren, energyRouteTitleMap } from '../config/energyMenu';
+import { energyMenuChildren, energyRouteTitleMap } from '../config/energyMenu';
 
 const { Sider, Header, Content } = Layout;
 
@@ -169,42 +169,6 @@ export default function MainLayout() {
       if (prev.some((t) => t.key === path)) return prev;
       return [...prev, { key: path, label: title, closable: path !== '/home' }];
     });
-
-    if (path.startsWith('/spare-parts')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, 'spare-parts'])],
-      );
-    }
-    if (path.startsWith('/security/events')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, 'security', 'security-events'])],
-      );
-    }
-    if (path.startsWith('/security/alarms')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, 'security', 'security-alarms'])],
-      );
-    }
-    if (path.startsWith('/security/access-control')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, 'security', 'security-access'])],
-      );
-    }
-    if (path.startsWith('/security/parking') || path.startsWith('/security/monitoring') || path.startsWith('/security/passage') || path.startsWith('/security/iot')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, 'security'])],
-      );
-    }
-    if (path.startsWith('/energy')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, ...getEnergyOpenKeys(path)])],
-      );
-    }
-    if (path.startsWith('/innovation-center')) {
-      setOpenKeys((prev) =>
-        [...new Set([...prev, 'innovation-center'])],
-      );
-    }
   }, [location.pathname]);
 
   const onMenuClick: MenuProps['onClick'] = ({ key }) => {

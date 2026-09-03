@@ -12,7 +12,7 @@ import {
 import { Avatar, Dropdown, Layout, Menu, Tabs } from 'antd';
 import type { MenuProps } from 'antd';
 import {
-  getMidPlatformOpenKeys,
+  getMidPlatformSelectedKey,
   midPlatformMenuItems,
   midPlatformRouteTitleMap,
 } from '../config/midPlatformMenu';
@@ -35,38 +35,36 @@ function MenuGridIcon() {
   );
 }
 
-const menuItemsWithIcons: MenuProps['items'] = midPlatformMenuItems.map((item) => {
-  if (!item || typeof item !== 'object' || !('label' in item)) return item;
-  const withIcon = { ...item, icon: <MenuGridIcon /> };
-  if ('children' in item && item.children) {
-    return {
-      ...withIcon,
-      children: item.children.map((child) =>
-        child && typeof child === 'object' && 'label' in child
-          ? { ...child, icon: <MenuGridIcon /> }
-          : child,
-      ),
-    };
-  }
-  return withIcon;
-});
+function withMenuIcons(items: MenuProps['items']): MenuProps['items'] {
+  return items?.map((item) => {
+    if (!item || typeof item !== 'object' || !('label' in item)) return item;
+    const withIcon = { ...item, icon: <MenuGridIcon /> };
+    if ('children' in item && item.children) {
+      return {
+        ...withIcon,
+        children: withMenuIcons(item.children) ?? [],
+      } as NonNullable<MenuProps['items']>[number];
+    }
+    return withIcon;
+  });
+}
+
+const menuItemsWithIcons: MenuProps['items'] = withMenuIcons(midPlatformMenuItems);
 
 export default function MidPlatformLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>(['mid-operations']);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [tabs, setTabs] = useState<TabItem[]>([
     { key: '/mid-platform/operations/home', label: '运营管理首页', closable: true },
     { key: '/mid-platform/operations/personnel', label: '人员管理', closable: true },
   ]);
 
-  const selectedKeys = useMemo(() => {
-    if (location.pathname.startsWith('/mid-platform/operations/personnel')) {
-      return ['/mid-platform/operations/personnel'];
-    }
-    return [location.pathname];
-  }, [location.pathname]);
+  const selectedKeys = useMemo(
+    () => [getMidPlatformSelectedKey(location.pathname)],
+    [location.pathname],
+  );
 
   useEffect(() => {
     const path = location.pathname;
@@ -77,8 +75,6 @@ export default function MidPlatformLayout() {
       if (prev.some((t) => t.key === path)) return prev;
       return [...prev, { key: path, label: title, closable: true }];
     });
-
-    setOpenKeys((prev) => [...new Set([...prev, ...getMidPlatformOpenKeys(path)])]);
   }, [location.pathname]);
 
   const onMenuClick: MenuProps['onClick'] = ({ key }) => {

@@ -1,19 +1,32 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  getAllMeetingFloorPlans,
   getMeetingFloorPlan,
   getMeetingRoomsByFloorPlan,
-  meetingFloorPlans,
 } from '../../../../data/mockMeetingRooms';
 import { getFloorPlanImageSrc } from '../../../../data/meetingFloorPlanAssets';
+import { useMeetingRoomStore } from '../../../../store/meetingRoomStore';
+import { useMeetingRoomFloorPlanStore } from '../../../../store/meetingRoomFloorPlanStore';
 import './MeetingRoomFloorPlan.css';
 
 export default function MeetingRoomFloorPlan() {
+  const [rooms] = useMeetingRoomStore();
+  const [floorPlanRecords] = useMeetingRoomFloorPlanStore();
   const navigate = useNavigate();
-  const [activePlanId, setActivePlanId] = useState(meetingFloorPlans[1]?.id ?? meetingFloorPlans[0].id);
+  const floorPlans = useMemo(
+    () => getAllMeetingFloorPlans(),
+    [rooms, floorPlanRecords],
+  );
+  const [activePlanId, setActivePlanId] = useState(
+    () => floorPlans.find((plan) => plan.id === 'office2-2f')?.id ?? floorPlans[0]?.id ?? '',
+  );
 
   const plan = getMeetingFloorPlan(activePlanId);
-  const rooms = useMemo(() => getMeetingRoomsByFloorPlan(activePlanId), [activePlanId]);
+  const roomList = useMemo(
+    () => getMeetingRoomsByFloorPlan(activePlanId),
+    [activePlanId, rooms, floorPlanRecords],
+  );
   const imageSrc = plan ? getFloorPlanImageSrc(plan.id) : '';
 
   if (!plan) return null;
@@ -21,7 +34,7 @@ export default function MeetingRoomFloorPlan() {
   return (
     <div className="mp-floor-plan">
       <div className="mp-floor-plan-tabs">
-        {meetingFloorPlans.map((item) => (
+        {floorPlans.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -46,7 +59,7 @@ export default function MeetingRoomFloorPlan() {
           preserveAspectRatio="xMidYMid meet"
           aria-hidden
         >
-          {rooms.map((room) => {
+          {roomList.map((room) => {
             const cx = (room.planX / 100) * plan.width;
             const cy = (room.planY / 100) * plan.height;
             return (
@@ -58,7 +71,7 @@ export default function MeetingRoomFloorPlan() {
           })}
         </svg>
 
-        {rooms.map((room) => (
+        {roomList.map((room) => (
           <button
             key={room.id}
             type="button"
@@ -78,7 +91,7 @@ export default function MeetingRoomFloorPlan() {
       </div>
 
       <div className="mp-floor-plan-room-list">
-        {rooms.map((room) => (
+        {roomList.map((room) => (
           <button
             key={room.id}
             type="button"

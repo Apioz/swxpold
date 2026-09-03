@@ -3,6 +3,7 @@ import { RightOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { message, Modal } from 'antd';
 import { getMeetingRoomById, getMeetingRoomAddress } from '../../../data/mockMeetingRooms';
+import { useMeetingRoomStore } from '../../../store/meetingRoomStore';
 import {
   collectPersons,
   meetingParticipantTree,
@@ -93,7 +94,11 @@ export default function MeetingRoomBook() {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = (location.state ?? {}) as BookLocationState;
-  const room = roomId ? getMeetingRoomById(roomId) : undefined;
+  const [rooms] = useMeetingRoomStore();
+  const room = useMemo(
+    () => (roomId ? getMeetingRoomById(roomId) : undefined),
+    [roomId, rooms],
+  );
 
   const [selectedSlots, setSelectedSlots] = useState<MeetingTimeSlot[]>([]);
   const [meetingType, setMeetingType] = useState<MeetingType>('standard');

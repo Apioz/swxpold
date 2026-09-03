@@ -14,7 +14,6 @@ import type { MenuProps } from 'antd';
 import {
   foundationMenuItems,
   foundationRouteTitleMap,
-  getFoundationOpenKeys,
 } from '../config/foundationMenu';
 import PlatformSwitcher from '../components/PlatformSwitcher';
 import './FoundationLayout.css';
@@ -72,8 +71,6 @@ export default function FoundationLayout() {
       if (prev.some((t) => t.key === path)) return prev;
       return [...prev, { key: path, label: title, closable: true }];
     });
-
-    setOpenKeys((prev) => [...new Set([...prev, ...getFoundationOpenKeys(path)])]);
   }, [location.pathname]);
 
   const onMenuClick: MenuProps['onClick'] = ({ key }) => {

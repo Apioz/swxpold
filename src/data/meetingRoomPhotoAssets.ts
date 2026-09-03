@@ -11,6 +11,8 @@ export const meetingRoomPhotoMap: Record<string, string> = {
   'r-2106': photo2106,
   'r-2108': photo2108,
   'r-2204': photo2204,
+  'mr-2204': photo2204,
+  '2204': photo2204,
   'r-5201': photo5201,
   'r-5211': photo5211,
   'r-3102': photo3102,

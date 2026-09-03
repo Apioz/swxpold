@@ -97,6 +97,12 @@ import {
   getExpandedReservationsForAudit,
 } from './meetingSubmissionStore';
 import { isOwnMeetingApplicant, meetingCurrentUser, meetingOtherApplicants } from './meetingCurrentUser';
+import {
+  buildManagedMeetingRoomTree,
+  getManagedFloorPlans,
+  getManagedMeetingRoomDetailById,
+  getManagedRoomsByFloorPlan,
+} from '../utils/meetingRoomBridge';
 
 export const meetingFloorPlans: MeetingFloorPlan[] = [
   { id: 'b8-4f', building: '8号楼', floor: '4F', label: '8号楼 4F', width: 960, height: 420 },
@@ -212,7 +218,11 @@ export const meetingRoomDetails: MeetingRoomDetail[] = [
   },
 ];
 
-export const meetingRoomTree: MeetingRoomNode[] = [
+export function getMeetingRoomTree(): MeetingRoomNode[] {
+  return [...buildManagedMeetingRoomTree(), ...legacyMeetingRoomTree];
+}
+
+const legacyMeetingRoomTree: MeetingRoomNode[] = [
   {
     id: 'b8',
     name: '8号楼',
@@ -581,7 +591,7 @@ export function getReservationsByAuditId(auditId: string): MeetingReservation[] 
 }
 
 export function getMeetingRoomById(id: string): MeetingRoomDetail | undefined {
-  return meetingRoomDetails.find((r) => r.id === id);
+  return getManagedMeetingRoomDetailById(id) ?? meetingRoomDetails.find((r) => r.id === id);
 }
 
 /** 会议室完整地址，如 8号楼4F 8401 普通会议室 */
@@ -590,11 +600,21 @@ export function getMeetingRoomAddress(room: Pick<MeetingRoomDetail, 'building' |
 }
 
 export function getMeetingRoomsByFloorPlan(floorPlanId: string): MeetingRoomDetail[] {
-  return meetingRoomDetails.filter((r) => r.floorPlanId === floorPlanId);
+  const managed = getManagedRoomsByFloorPlan(floorPlanId);
+  const legacy = meetingRoomDetails.filter((r) => r.floorPlanId === floorPlanId);
+  const managedIds = new Set(managed.map((room) => room.id));
+  return [...managed, ...legacy.filter((room) => !managedIds.has(room.id))];
+}
+
+export function getAllMeetingFloorPlans(): MeetingFloorPlan[] {
+  const merged = new Map<string, MeetingFloorPlan>();
+  meetingFloorPlans.forEach((plan) => merged.set(plan.id, plan));
+  getManagedFloorPlans().forEach((plan) => merged.set(plan.id, plan));
+  return [...merged.values()];
 }
 
 export function getMeetingFloorPlan(id: string): MeetingFloorPlan | undefined {
-  return meetingFloorPlans.find((p) => p.id === id);
+  return getAllMeetingFloorPlans().find((p) => p.id === id);
 }
 
 export function getReservationById(id: string): MeetingReservation | undefined {

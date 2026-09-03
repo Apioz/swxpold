@@ -33,8 +33,10 @@ import MeetingAudit from './pages/mini-program/meeting-room/MeetingAudit';
 import MeetingRoomDoorPanel from './pages/meeting-room-door/MeetingRoomDoorPanel';
 import MidPlatformPersonnelManagement from './pages/mid-platform/operations/PersonnelManagement';
 import OperationsHome from './pages/mid-platform/operations/OperationsHome';
+import MeetingRoomListPage from './pages/mid-platform/appointment/meeting-room/MeetingRoomList';
 import FoundationLayout from './layouts/FoundationLayout';
 import SpaceCenter from './pages/foundation/space-center/SpaceCenter';
+import DocumentCenter from './pages/foundation/document-center/DocumentCenter';
 import FoundationPlaceholder from './pages/foundation/FoundationPlaceholder';
 import './App.css';
 
@@ -229,12 +231,36 @@ function App() {
           <Route path="/mid-platform" element={<MidPlatformLayout />}>
             <Route
               index
-              element={<Navigate to="/mid-platform/operations/personnel" replace />}
+              element={<Navigate to="/mid-platform/appointment/meeting-rooms/list" replace />}
             />
             <Route path="operations/home" element={<OperationsHome />} />
             <Route
               path="operations/personnel"
               element={<MidPlatformPersonnelManagement />}
+            />
+            <Route
+              path="appointment/visitors"
+              element={<PlaceholderPage title="访客管理" />}
+            />
+            <Route
+              path="appointment/meeting-rooms/report"
+              element={<PlaceholderPage title="会议室报表" />}
+            />
+            <Route
+              path="appointment/meeting-rooms/list"
+              element={<MeetingRoomListPage />}
+            />
+            <Route
+              path="appointment/meeting-rooms/reservations"
+              element={<PlaceholderPage title="会议预约" />}
+            />
+            <Route
+              path="appointment/meeting-rooms/audit"
+              element={<PlaceholderPage title="会议审核" />}
+            />
+            <Route
+              path="appointment/meeting-rooms/records"
+              element={<PlaceholderPage title="会议记录" />}
             />
           </Route>
           <Route path="/foundation" element={<FoundationLayout />}>
@@ -244,7 +270,7 @@ function App() {
             <Route path="model-center" element={<FoundationPlaceholder title="模型中心" />} />
             <Route path="device-center" element={<FoundationPlaceholder title="设备中心" />} />
             <Route path="floor-manage" element={<FoundationPlaceholder title="全层管理" />} />
-            <Route path="document-center" element={<FoundationPlaceholder title="文档中心" />} />
+            <Route path="document-center" element={<DocumentCenter />} />
             <Route path="source-center" element={<FoundationPlaceholder title="源码中心" />} />
             <Route path="collaboration-center" element={<FoundationPlaceholder title="协同中心" />} />
             <Route path="iot/devices" element={<FoundationPlaceholder title="设备接入" />} />
