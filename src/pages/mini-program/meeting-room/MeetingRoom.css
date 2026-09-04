@@ -785,6 +785,20 @@
   color: #bbb;
 }
 
+.mp-reservation-detail-audit-rule {
+  flex: 1;
+  color: #1890ff;
+  font-size: 14px;
+  text-align: right;
+}
+
+.mp-reservation-detail-approvers {
+  flex: 1;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+  text-align: right;
+}
+
 .mp-reservation-detail-icon {
   width: 16px;
   height: 16px;

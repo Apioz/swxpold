@@ -15,6 +15,7 @@ import {
   ProjectOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
+  StarOutlined,
   ThunderboltOutlined,
   ToolOutlined,
   UnorderedListOutlined,
@@ -58,7 +59,8 @@ const routeTitleMap: Record<string, string> = {
   '/mobile': '移动端管理',
   '/customer': '客户管理',
   '/project': '项目管理',
-  '/system': '系统管理',
+  '/system/params': '参数管理',
+  '/system/audit-flow': '审核流程配置',
   '/task': '任务管理',
 };
 
@@ -136,7 +138,22 @@ const menuItems: MenuItem[] = [
   { key: '/mobile', icon: <MobileOutlined />, label: '移动端管理' },
   { key: '/customer', icon: <CustomerServiceOutlined />, label: '客户管理' },
   { key: '/project', icon: <ProjectOutlined />, label: '项目管理' },
-  { key: '/system', icon: <SettingOutlined />, label: '系统管理' },
+  {
+    key: 'system',
+    icon: <SettingOutlined />,
+    label: '系统管理',
+    children: [
+      {
+        key: '/system/params',
+        label: (
+          <span className="main-menu-star-label">
+            参数管理 <StarOutlined />
+          </span>
+        ),
+      },
+      { key: '/system/audit-flow', label: '审核流程配置' },
+    ],
+  },
   { key: '/task', icon: <UnorderedListOutlined />, label: '任务管理' },
 ];
 

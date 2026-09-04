@@ -15,6 +15,7 @@ import {
 import {
   Button,
   Cascader,
+  Checkbox,
   Form,
   Input,
   InputNumber,
@@ -110,7 +111,7 @@ export default function MeetingRoomFormModal({
         capacity: record.capacity,
         status: record.status,
         usagePermission: record.usagePermission,
-        equipment: record.equipment[0],
+        equipment: record.equipment,
         screenDevice: record.screenDevice.includes('、')
           ? record.screenDevice.split('、')[0]?.trim() ?? record.screenDevice
           : record.screenDevice,
@@ -486,17 +487,17 @@ export default function MeetingRoomFormModal({
                 </Form.Item>
               )}
               <Form.Item label="设备" name="equipment" className="full-width">
-                <Radio.Group className="mid-platform-equipment-group">
+                <Checkbox.Group className="mid-platform-equipment-group">
                   {MEETING_ROOM_EQUIPMENT_OPTIONS.map((item) => (
-                    <Radio
+                    <Checkbox
                       key={item.value}
                       value={item.value}
                       className="mid-platform-equipment-tag"
                     >
                       {equipmentIcons[item.value]} {item.label}
-                    </Radio>
+                    </Checkbox>
                   ))}
-                </Radio.Group>
+                </Checkbox.Group>
               </Form.Item>
               <Form.Item label="预约屏设备" name="screenDevice" className="full-width">
                 <Select

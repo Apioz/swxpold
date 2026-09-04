@@ -158,3 +158,9 @@
   overflow: auto;
   background: transparent;
 }
+
+.main-menu-star-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -34,6 +34,8 @@ import MeetingRoomDoorPanel from './pages/meeting-room-door/MeetingRoomDoorPanel
 import MidPlatformPersonnelManagement from './pages/mid-platform/operations/PersonnelManagement';
 import OperationsHome from './pages/mid-platform/operations/OperationsHome';
 import MeetingRoomListPage from './pages/mid-platform/appointment/meeting-room/MeetingRoomList';
+import MeetingReservationList from './pages/mid-platform/appointment/meeting-room/MeetingReservationList';
+import AuditFlowConfigList from './pages/mid-platform/system/AuditFlowConfigList';
 import FoundationLayout from './layouts/FoundationLayout';
 import SpaceCenter from './pages/foundation/space-center/SpaceCenter';
 import DocumentCenter from './pages/foundation/document-center/DocumentCenter';
@@ -220,8 +222,13 @@ function App() {
             />
             <Route
               path="system"
-              element={<PlaceholderPage title="系统管理" />}
+              element={<Navigate to="/system/audit-flow" replace />}
             />
+            <Route
+              path="system/params"
+              element={<PlaceholderPage title="参数管理" />}
+            />
+            <Route path="system/audit-flow" element={<AuditFlowConfigList />} />
             <Route
               path="task"
               element={<PlaceholderPage title="任务管理" />}
@@ -252,7 +259,7 @@ function App() {
             />
             <Route
               path="appointment/meeting-rooms/reservations"
-              element={<PlaceholderPage title="会议预约" />}
+              element={<MeetingReservationList />}
             />
             <Route
               path="appointment/meeting-rooms/audit"

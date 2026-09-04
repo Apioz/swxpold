@@ -52,6 +52,15 @@ export interface MeetingReservation {
   /** 申请人 id */
   applicantId: string;
   applicantName?: string;
+  /** 命中的审核流程规则 */
+  matchedAuditFlowId?: string;
+  matchedAuditFlowName?: string;
+  /** 待审批人（审批中时有值） */
+  pendingApproverNames?: string[];
+  /** 自动审批通过时的审批人 */
+  approvedByNames?: string[];
+  /** 自动审批时的组织管理员说明，如「当前组织管理员」 */
+  autoApproverScopeLabel?: string;
 }
 
 export interface MeetingAuditItem {
@@ -78,6 +87,15 @@ export interface MeetingAuditItem {
   /** 申请人 id */
   applicantId: string;
   applicantName?: string;
+  /** 命中的审核流程规则 */
+  matchedAuditFlowId?: string;
+  matchedAuditFlowName?: string;
+  /** 待审批人（审批中时有值） */
+  pendingApproverNames?: string[];
+  /** 自动审批通过时的审批人 */
+  approvedByNames?: string[];
+  /** 自动审批时的组织管理员说明，如「当前组织管理员」 */
+  autoApproverScopeLabel?: string;
 }
 
 export interface MeetingFloorPlan {

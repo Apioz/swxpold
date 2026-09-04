@@ -120,10 +120,7 @@ export default function MeetingRoomList() {
   };
 
   const handleFormSubmit = (values: Record<string, unknown>) => {
-    const equipmentValue = values.equipment as MeetingRoomEquipment | undefined;
-    const equipment: MidPlatformMeetingRoom['equipment'] = equipmentValue
-      ? [equipmentValue]
-      : [];
+    const equipment = (values.equipment as MeetingRoomEquipment[] | undefined) ?? [];
     const spaceLocation = values.spaceLocation as string;
     const building = resolveBuildingFromSpaceLocation(spaceLocation);
 

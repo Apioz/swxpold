@@ -1,0 +1,252 @@
+.meeting-reservation-page .mid-platform-table-toolbar {
+  justify-content: flex-end;
+}
+
+.meeting-reservation-table .ant-table-thead > tr > th {
+  text-align: center;
+}
+
+.meeting-reservation-table .ant-table-thead > tr > th:nth-child(4),
+.meeting-reservation-table .ant-table-thead > tr > th:nth-child(5),
+.meeting-reservation-table .ant-table-thead > tr > th:nth-child(7),
+.meeting-reservation-table .ant-table-thead > tr > th:nth-child(8) {
+  text-align: center;
+}
+
+.meeting-reservation-table .ant-table-tbody > tr > td {
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.meeting-reservation-thumb {
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.meeting-reservation-thumb-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 36px;
+  margin: 0 auto;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 18px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 2px;
+}
+
+.meeting-reservation-equipment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.meeting-reservation-equipment-tag {
+  display: inline-block;
+  padding: 0 8px;
+  color: #1890ff;
+  font-size: 12px;
+  line-height: 22px;
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 2px;
+}
+
+.meeting-reservation-status-text {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 13px;
+}
+
+.meeting-reservation-status-text.is-enabled {
+  color: #52c41a;
+}
+
+.meeting-reservation-action-link {
+  color: #1890ff;
+  font-size: 13px;
+}
+
+.meeting-reservation-day-timeline {
+  min-width: 360px;
+}
+
+.meeting-reservation-day-timeline-hours {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+}
+
+.meeting-reservation-day-timeline-hour {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.meeting-reservation-day-timeline-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  height: 18px;
+  margin-top: 2px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+}
+
+.meeting-reservation-day-timeline-cell {
+  border-right: 1px solid #f0f0f0;
+}
+
+.meeting-reservation-day-timeline-cell:last-child {
+  border-right: none;
+}
+
+.meeting-reservation-day-timeline-cell.is-booked {
+  background: #fff1f0;
+}
+
+.meeting-reservation-day-timeline-block {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #ff7875;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.meeting-reservation-day-timeline-date {
+  margin-top: 4px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.meeting-reservation-status-timeline {
+  padding: 12px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+}
+
+.meeting-reservation-status-timeline-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 13px;
+}
+
+.meeting-reservation-status-timeline-axis {
+  display: grid;
+  grid-template-columns: repeat(25, minmax(0, 1fr));
+  margin-bottom: 6px;
+}
+
+.meeting-reservation-status-timeline-tick {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 11px;
+}
+
+.meeting-reservation-status-timeline-bar {
+  position: relative;
+  height: 36px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
+}
+
+.meeting-reservation-status-timeline-booked {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  font-size: 12px;
+  background: #ff7875;
+  border-radius: 2px;
+}
+
+.meeting-reservation-status-timeline-booked span {
+  padding: 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.meeting-reservation-status-timeline-selection {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(24, 144, 255, 0.18);
+  border: 1px dashed #1890ff;
+  pointer-events: none;
+}
+
+.meeting-reservation-status-timeline-now {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: #ff4d4f;
+  pointer-events: none;
+}
+
+.mid-platform-meeting-reservation-modal .ant-modal-body {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+
+.meeting-reservation-type-tabs {
+  margin-bottom: 16px;
+}
+
+.meeting-reservation-time-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.meeting-reservation-time-select .ant-form-item-control-input {
+  min-height: auto;
+}
+
+.meeting-reservation-create-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.meeting-reservation-inline-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.meeting-reservation-conflict-hint {
+  color: #ff4d4f;
+}
+
+.meeting-reservation-calendar-cell {
+  min-height: 42px;
+}
+
+.meeting-reservation-calendar-event {
+  margin-top: 2px;
+  padding: 0 4px;
+  overflow: hidden;
+  color: #389e0d;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: #f6ffed;
+  border-radius: 2px;
+}
+
+.mid-platform-equipment-group .mid-platform-equipment-tag .ant-checkbox {
+  display: none;
+}
+
+.mid-platform-equipment-group .mid-platform-equipment-tag .ant-checkbox + span {
+  padding-inline: 0;
+}

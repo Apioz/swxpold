@@ -100,6 +100,38 @@ export default function MeetingReservationDetail() {
             </span>
           </div>
 
+          {reservation.matchedAuditFlowName && (
+            <div className="mp-reservation-detail-item mp-reservation-detail-item--inline">
+              <span className="mp-reservation-detail-label">审核规则</span>
+              <span className="mp-reservation-detail-value mp-reservation-detail-audit-rule">
+                {reservation.matchedAuditFlowName}
+              </span>
+            </div>
+          )}
+
+          {reservation.status === 'processing' &&
+            reservation.pendingApproverNames &&
+            reservation.pendingApproverNames.length > 0 && (
+              <div className="mp-reservation-detail-item mp-reservation-detail-item--inline">
+                <span className="mp-reservation-detail-label">待审批人</span>
+                <span className="mp-reservation-detail-value mp-reservation-detail-approvers">
+                  {reservation.pendingApproverNames.join('、')}
+                </span>
+              </div>
+            )}
+
+          {reservation.approvedByNames && reservation.approvedByNames.length > 0 && (
+            <div className="mp-reservation-detail-item mp-reservation-detail-item--inline">
+              <span className="mp-reservation-detail-label">审批人</span>
+              <span className="mp-reservation-detail-value mp-reservation-detail-approvers">
+                {reservation.approvedByNames.join('、')}
+                {reservation.autoApproverScopeLabel
+                  ? `（${reservation.autoApproverScopeLabel}自动通过）`
+                  : '（当前组织管理员自动通过）'}
+              </span>
+            </div>
+          )}
+
           <div className="mp-reservation-detail-item">
             <div className="mp-reservation-detail-label">
               <RequiredMark />

@@ -196,3 +196,9 @@
   padding: 12px;
   background: #f0f2f5;
 }
+
+.mid-platform-menu-star-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

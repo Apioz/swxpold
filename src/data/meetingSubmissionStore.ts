@@ -1,5 +1,7 @@
+import { getAuditFlowConfigs } from '../store/auditFlowConfigStore';
+import { resolveAuditApprovalPlan } from '../utils/auditFlowMatcher';
 import type { MeetingAuditItem, MeetingReservation } from './mockMeetingRooms';
-import { meetingCurrentUser } from './meetingCurrentUser';
+import { buildMeetingApplicantContext, meetingCurrentUser } from './meetingCurrentUser';
 import {
   expandRecurringToStandardReservations,
   findRecurringConflictDates,
@@ -66,6 +68,78 @@ function buildApplicantFields() {
   };
 }
 
+interface SubmissionAuditOutcome {
+  reservationStatus: MeetingReservation['status'];
+  reservationStatusLabel: string;
+  auditStatus: MeetingAuditItem['status'];
+  auditStatusLabel: string;
+  matchedFlowMeta: {
+    matchedAuditFlowId?: string;
+    matchedAuditFlowName?: string;
+  };
+  approverNames?: string[];
+  approveMode?: 'auto' | 'manual';
+  autoApproverScopeLabel?: string;
+}
+
+function buildAuditRecordFields(outcome: SubmissionAuditOutcome) {
+  const fields = { ...outcome.matchedFlowMeta } as Record<string, unknown>;
+  if (outcome.approverNames?.length) {
+    if (outcome.approveMode === 'auto') {
+      fields.approvedByNames = outcome.approverNames;
+      if (outcome.autoApproverScopeLabel) {
+        fields.autoApproverScopeLabel = outcome.autoApproverScopeLabel;
+      }
+    } else {
+      fields.pendingApproverNames = outcome.approverNames;
+    }
+  }
+  return fields;
+}
+
+function resolveSubmissionAuditOutcome(roomId: string, roomName: string): SubmissionAuditOutcome {
+  const plan = resolveAuditApprovalPlan(getAuditFlowConfigs(), {
+    processType: '会议室预约',
+    roomId,
+    roomName,
+    ...buildMeetingApplicantContext(),
+  });
+
+  const primaryFlow = plan.matchedFlows[0];
+  const matchedFlowMeta = primaryFlow
+    ? {
+        matchedAuditFlowId: primaryFlow.id,
+        matchedAuditFlowName: plan.displayName,
+      }
+    : {};
+
+  const approverNames = plan.approverNames;
+
+  if (plan.approveMode === 'auto') {
+    const scopeLabel = plan.approverScopeLabel ?? '组织管理员';
+    return {
+      reservationStatus: 'completed',
+      reservationStatusLabel: `${scopeLabel}已自动通过`,
+      auditStatus: 'approved',
+      auditStatusLabel: `${scopeLabel}已自动通过`,
+      matchedFlowMeta,
+      approverNames,
+      approveMode: 'auto',
+      autoApproverScopeLabel: scopeLabel,
+    };
+  }
+
+  return {
+    reservationStatus: 'processing',
+    reservationStatusLabel: '审批中',
+    auditStatus: 'pending',
+    auditStatusLabel: '待审批',
+    matchedFlowMeta,
+    approverNames,
+    approveMode: 'manual',
+  };
+}
+
 export function submitRecurringMeeting(payload: RecurringSubmitPayload): RecurringSubmitResult {
   const excludedDates = findRecurringConflictDates(
     payload.roomId,
@@ -79,6 +153,7 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
   const auditId = nextId('audit-recurring-pending');
   const timeSlot = formatMeetingTimeRange(payload.selectedSlots).replace('-', ' - ');
   const applicant = buildApplicantFields();
+  const auditOutcome = resolveSubmissionAuditOutcome(payload.roomId, payload.roomName);
 
   const reservation: MeetingReservation = {
     id: reservationId,
@@ -87,8 +162,8 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
     address: payload.address,
     roomId: payload.roomId,
     roomName: payload.roomName,
-    status: 'processing',
-    statusLabel: '审批中',
+    status: auditOutcome.reservationStatus,
+    statusLabel: auditOutcome.reservationStatusLabel,
     meetingType: 'recurring',
     recurrenceStartDate: formatDisplayDate(payload.recurrenceStartDate),
     recurrenceEndDate: formatDisplayDate(payload.recurrenceEndDate),
@@ -97,6 +172,7 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
     description: payload.description,
     excludedDates,
     ...applicant,
+    ...buildAuditRecordFields(auditOutcome),
   };
 
   const audit: MeetingAuditItem = {
@@ -104,8 +180,8 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
     title: payload.title,
     roomName: payload.roomName,
     roomId: payload.roomId,
-    status: 'pending',
-    statusLabel: '待审批',
+    status: auditOutcome.auditStatus,
+    statusLabel: auditOutcome.auditStatusLabel,
     meetingType: 'recurring',
     recurrenceStartDate: formatDisplayDate(payload.recurrenceStartDate),
     recurrenceEndDate: formatDisplayDate(payload.recurrenceEndDate),
@@ -114,6 +190,7 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
     reservationId,
     excludedDates,
     ...applicant,
+    ...buildAuditRecordFields(auditOutcome),
   };
 
   dynamicReservations.push(reservation);
@@ -130,6 +207,7 @@ export function submitStandardMeeting(payload: StandardSubmitPayload): StandardS
     ? `${payload.activeDate} ${timeRange.split('-')[0]?.trim() ?? '09:00'}:00`
     : '';
   const applicant = buildApplicantFields();
+  const auditOutcome = resolveSubmissionAuditOutcome(payload.roomId, payload.roomName);
 
   const reservation: MeetingReservation = {
     id: reservationId,
@@ -138,14 +216,15 @@ export function submitStandardMeeting(payload: StandardSubmitPayload): StandardS
     address: payload.address,
     roomId: payload.roomId,
     roomName: payload.roomName,
-    status: 'processing',
-    statusLabel: '审批中',
+    status: auditOutcome.reservationStatus,
+    statusLabel: auditOutcome.reservationStatusLabel,
     meetingType: 'standard',
     duration: payload.duration ?? '1小时',
     participants: payload.participants,
     participantCount: payload.participantCount,
     description: payload.description,
     ...applicant,
+    ...buildAuditRecordFields(auditOutcome),
   };
 
   const audit: MeetingAuditItem = {
@@ -153,12 +232,13 @@ export function submitStandardMeeting(payload: StandardSubmitPayload): StandardS
     title: payload.title,
     roomName: payload.roomName,
     roomId: payload.roomId,
-    status: 'pending',
-    statusLabel: '待审批',
+    status: auditOutcome.auditStatus,
+    statusLabel: auditOutcome.auditStatusLabel,
     meetingType: 'standard',
     time,
     reservationId,
     ...applicant,
+    ...buildAuditRecordFields(auditOutcome),
   };
 
   dynamicReservations.push(reservation);
