@@ -49,7 +49,7 @@ import {
   getFloorPlan,
   useMeetingRoomFloorPlanStore,
 } from '../../../../../store/meetingRoomFloorPlanStore';
-import { resolveMeetingRoomFloorContext, getMeetingRoomFloorKey } from '../../../../../utils/meetingRoomFloorContext';
+import { resolveMeetingRoomFloorContext, resolveMeetingRoomFloorContextFromRecord, getMeetingRoomFloorKey } from '../../../../../utils/meetingRoomFloorContext';
 import '../../../../../components/foundation/DocumentExplorer.css';
 
 interface MeetingRoomFormModalProps {
@@ -142,11 +142,11 @@ export default function MeetingRoomFormModal({
   const roomStatus = Form.useWatch('status', form) as MidPlatformMeetingRoom['status'] | undefined;
 
   const floorCtx = useMemo(() => {
-    const resolved = resolveMeetingRoomFloorContext({
+    const resolved = resolveMeetingRoomFloorContextFromRecord({
+      building: record?.building ?? spaceLocationPath[0],
       spaceLocation,
       address,
       cover,
-      building: record?.building ?? spaceLocationPath[0],
     });
     if (resolved) return resolved;
 

@@ -1,11 +1,17 @@
 import type { MidPlatformMeetingRoom } from '../types/midPlatformMeetingRoom';
 import type { SelectedDocumentImage, SelectedFloorPlan } from '../types/foundationDocument';
+import { parseMeetingRoomSpacePath } from '../data/meetingRoomSpaceOptions';
 
 export function getMeetingRoomFloorKey(building: string, floor: string): string {
   return `${building.trim()}__${floor.trim()}`;
 }
 
 export function parseFloorFromAddress(address: string): string {
+  const segments = address
+    .split('|')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (segments.length >= 2) return segments[1];
   const match = address.match(/\|\s*(\d+F)\s*\|/i);
   return match?.[1] ?? '';
 }
@@ -52,6 +58,29 @@ export function resolveMeetingRoomFloorContext(input: {
   const floor = resolveMeetingRoomFloor(input);
   if (!building || !floor) return null;
   return { building, floor, floorKey: getMeetingRoomFloorKey(building, floor) };
+}
+
+/** 从会议室记录解析楼层上下文（与编辑弹窗逻辑一致） */
+export function resolveMeetingRoomFloorContextFromRecord(
+  record: Partial<Pick<MidPlatformMeetingRoom, 'building' | 'spaceLocation' | 'address' | 'cover'>>,
+): { building: string; floor: string; floorKey: string } | null {
+  const path = parseMeetingRoomSpacePath(record.spaceLocation);
+  const resolved = resolveMeetingRoomFloorContext({
+    building: record.building?.trim() || path[0],
+    spaceLocation: record.spaceLocation,
+    address: record.address,
+    cover: record.cover,
+  });
+  if (resolved) return resolved;
+
+  if (path.length >= 2) {
+    const building = path[0]?.trim() ?? '';
+    const floor = path[1]?.trim() ?? '';
+    if (building && floor) {
+      return { building, floor, floorKey: getMeetingRoomFloorKey(building, floor) };
+    }
+  }
+  return null;
 }
 
 export function isSameMeetingRoomFloor(

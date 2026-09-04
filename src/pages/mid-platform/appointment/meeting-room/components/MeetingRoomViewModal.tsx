@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   AudioOutlined,
   BorderOutlined,
@@ -11,8 +11,12 @@ import type {
   MidPlatformMeetingRoom,
 } from '../../../../../types/midPlatformMeetingRoom';
 import FloorPlanPointViewModal from '../../../../../components/foundation/FloorPlanPointViewModal';
-import { getFloorPlan } from '../../../../../store/meetingRoomFloorPlanStore';
-import { resolveMeetingRoomFloorContext } from '../../../../../utils/meetingRoomFloorContext';
+import {
+  getFloorPlan,
+  useMeetingRoomFloorPlanStore,
+} from '../../../../../store/meetingRoomFloorPlanStore';
+import { resolveMeetingRoomFloorContextFromRecord } from '../../../../../utils/meetingRoomFloorContext';
+import '../MeetingRoomList.css';
 
 interface MeetingRoomViewModalProps {
   open: boolean;
@@ -41,16 +45,15 @@ export default function MeetingRoomViewModal({
   onClose,
 }: MeetingRoomViewModalProps) {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [floorPlans] = useMeetingRoomFloorPlanStore();
+
+  const floorCtx = useMemo(
+    () => (record ? resolveMeetingRoomFloorContextFromRecord(record) : null),
+    [record, floorPlans],
+  );
+  const floorPlan = floorCtx ? getFloorPlan(floorCtx.building, floorCtx.floor) : undefined;
 
   if (!record) return null;
-
-  const floorCtx = resolveMeetingRoomFloorContext({
-    building: record.building,
-    spaceLocation: record.spaceLocation,
-    address: record.address,
-    cover: record.cover,
-  });
-  const floorPlan = floorCtx ? getFloorPlan(floorCtx.building, floorCtx.floor) : undefined;
 
   return (
     <>
