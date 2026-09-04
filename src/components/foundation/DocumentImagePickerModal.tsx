@@ -48,7 +48,7 @@ export default function DocumentImagePickerModal({
 
   const handleLocalUpload = (file: File) => {
     if (!expectedBuilding || !expectedFloor) {
-      message.warning('请先填写包含楼栋与楼层信息的地址');
+      message.warning('请先选择空间位置（至少到楼层），以便关联楼栋与楼层');
       return Upload.LIST_IGNORE;
     }
 
@@ -116,10 +116,10 @@ export default function DocumentImagePickerModal({
       className="doc-image-picker-modal doc-cover-picker-modal"
     >
       <div className="doc-floor-plan-picker-tip">
-        上传室内全景图作为会议室封面，保存后将写入数据库并在小程序列表展示。
+        上传室内全景图作为会议室封面（可选），保存后写入数据库并在小程序列表展示；与楼层平面图互不影响。
         {expectedBuilding && expectedFloor
           ? ` 当前会议室：${expectedBuilding} · ${expectedFloor}`
-          : ' 请先填写包含楼栋与楼层信息的地址。'}
+          : ' 请先选择空间位置（至少到楼层），以便关联楼栋与楼层。'}
       </div>
 
       <div className="doc-floor-plan-upload-layout">

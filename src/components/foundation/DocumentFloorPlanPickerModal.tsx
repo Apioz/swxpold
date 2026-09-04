@@ -50,7 +50,7 @@ export default function DocumentFloorPlanPickerModal({
 
   const handleLocalUpload = (file: File) => {
     if (!expectedBuilding || !expectedFloor) {
-      message.warning('请先填写包含楼栋与楼层信息的地址');
+      message.warning('请先选择空间位置（至少到楼层），以便关联楼栋与楼层');
       return Upload.LIST_IGNORE;
     }
 
@@ -120,8 +120,10 @@ export default function DocumentFloorPlanPickerModal({
       className="doc-image-picker-modal doc-floor-plan-picker-modal"
     >
       <div className="doc-floor-plan-picker-tip">
-        上传楼层平面图，保存后将写入数据库并应用于 {expectedBuilding ?? '-'} ·{' '}
-        {expectedFloor ?? '-'} 全部会议室，小程序平面图页同步展示。
+        上传楼层平面图（可选），保存后写入数据库并应用于本楼层全部会议室；与会议室封面互不影响，可先传平面图或不上传封面。
+        {expectedBuilding && expectedFloor
+          ? ` 当前楼层：${expectedBuilding} · ${expectedFloor}`
+          : ''}
       </div>
 
       <div className="doc-floor-plan-upload-layout">

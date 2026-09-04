@@ -78,35 +78,72 @@ export default function MeetingRoomViewModal({
             </div>
           </section>
 
-          {record.cover && (
-            <section className="meeting-room-form-section">
-              <div className="meeting-room-form-section-title">封面与点位</div>
-              <div className="meeting-room-cover-panel has-cover">
-                <div className="meeting-room-cover-panel-media">
-                  <img src={record.cover.imageUrl} alt={record.cover.imageName} />
-                </div>
-                <div className="meeting-room-cover-panel-body">
-                  <div className="meeting-room-cover-panel-name">{record.cover.imageName}</div>
-                  <div className="meeting-room-cover-panel-path">{record.cover.documentPath}</div>
-                  <div className="meeting-room-cover-panel-meta">
-                    {record.cover.building} · {record.cover.floor}
-                  </div>
-                  <div className="meeting-room-cover-panel-actions">
-                    <Button
-                      icon={<EnvironmentOutlined />}
-                      onClick={() => setLocationModalOpen(true)}
-                      disabled={!floorPlan}
-                    >
-                      查看定位
-                    </Button>
-                    <Tag color={record.planPoint ? 'success' : 'default'}>
-                      {record.planPoint ? '已设置点位' : '未设置点位'}
-                    </Tag>
+          <section className="meeting-room-form-section">
+            <div className="meeting-room-form-section-title">封面与点位</div>
+
+            <div className="meeting-room-media-row">
+              {record.cover ? (
+                <div className="meeting-room-form-subsection">
+                  <div className="meeting-room-form-subsection-label">会议室全景图</div>
+                  <div className="meeting-room-cover-panel has-cover meeting-room-media-panel">
+                    <div className="meeting-room-cover-panel-media">
+                      <img src={record.cover.imageUrl} alt={record.cover.imageName} />
+                    </div>
+                    <div className="meeting-room-cover-panel-body">
+                      <div className="meeting-room-cover-panel-name">{record.cover.imageName}</div>
+                      <div className="meeting-room-cover-panel-path">{record.cover.documentPath}</div>
+                      <div className="meeting-room-cover-panel-meta">
+                        {record.cover.building} · {record.cover.floor}
+                      </div>
+                    </div>
                   </div>
                 </div>
+              ) : (
+                <div className="meeting-room-form-subsection">
+                  <div className="meeting-room-form-subsection-label">会议室全景图</div>
+                  <div className="meeting-room-floor-plan-empty meeting-room-media-panel">
+                    未上传封面（可选）
+                  </div>
+                </div>
+              )}
+
+              <div className="meeting-room-form-subsection">
+                <div className="meeting-room-form-subsection-label">
+                  楼层平面图
+                  {floorCtx && (
+                    <span className="meeting-room-form-subsection-meta">
+                      {floorCtx.building} · {floorCtx.floor}
+                    </span>
+                  )}
+                </div>
+                {floorPlan ? (
+                  <div className="meeting-room-floor-plan-panel has-plan meeting-room-media-panel">
+                    <div className="meeting-room-floor-plan-preview">
+                      <img src={floorPlan.imageUrl} alt={floorPlan.imageName} />
+                    </div>
+                    <div className="meeting-room-floor-plan-body">
+                      <div className="meeting-room-cover-panel-name">{floorPlan.imageName}</div>
+                      <div className="meeting-room-cover-panel-actions">
+                        <Button
+                          icon={<EnvironmentOutlined />}
+                          onClick={() => setLocationModalOpen(true)}
+                        >
+                          查看定位
+                        </Button>
+                        <Tag color={record.planPoint ? 'success' : 'default'}>
+                          {record.planPoint ? '已设置点位' : '未设置点位'}
+                        </Tag>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="meeting-room-floor-plan-empty meeting-room-media-panel">
+                    该楼层尚未上传平面图
+                  </div>
+                )}
               </div>
-            </section>
-          )}
+            </div>
+          </section>
 
           <section className="meeting-room-form-section">
             <div className="meeting-room-form-section-title">预约配置</div>

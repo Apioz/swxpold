@@ -49,7 +49,7 @@ import {
   getFloorPlan,
   useMeetingRoomFloorPlanStore,
 } from '../../../../../store/meetingRoomFloorPlanStore';
-import { resolveMeetingRoomFloorContext } from '../../../../../utils/meetingRoomFloorContext';
+import { resolveMeetingRoomFloorContext, getMeetingRoomFloorKey } from '../../../../../utils/meetingRoomFloorContext';
 import '../../../../../components/foundation/DocumentExplorer.css';
 
 interface MeetingRoomFormModalProps {
@@ -141,15 +141,27 @@ export default function MeetingRoomFormModal({
     | undefined;
   const roomStatus = Form.useWatch('status', form) as MidPlatformMeetingRoom['status'] | undefined;
 
-  const floorCtx = useMemo(
-    () =>
-      resolveMeetingRoomFloorContext({
-        spaceLocation,
-        address,
-        building: record?.building,
-      }),
-    [spaceLocation, address, record?.building, floorPlans],
-  );
+  const floorCtx = useMemo(() => {
+    const resolved = resolveMeetingRoomFloorContext({
+      spaceLocation,
+      address,
+      cover,
+      building: record?.building ?? spaceLocationPath[0],
+    });
+    if (resolved) return resolved;
+
+    if (spaceLocationPath.length >= 2) {
+      const building = spaceLocationPath[0]?.trim() ?? '';
+      const floor = spaceLocationPath[1]?.trim() ?? '';
+      if (building && floor) {
+        return { building, floor, floorKey: getMeetingRoomFloorKey(building, floor) };
+      }
+    }
+    return null;
+  }, [spaceLocation, address, cover, record?.building, floorPlans, spaceLocationPath]);
+
+  const pickerBuilding = floorCtx?.building ?? spaceLocationPath[0];
+  const pickerFloor = floorCtx?.floor ?? spaceLocationPath[1];
 
   const floorPlan = floorCtx
     ? getFloorPlan(floorCtx.building, floorCtx.floor)
@@ -182,9 +194,13 @@ export default function MeetingRoomFormModal({
     }
   };
 
+  const warnMissingFloorContext = () => {
+    message.warning('请先选择空间位置（至少到楼层），或上传封面/平面图以确定楼栋与楼层');
+  };
+
   const handleOpenPointModal = () => {
     if (!floorCtx) {
-      message.warning('请先填写包含楼栋与楼层信息的地址');
+      warnMissingFloorContext();
       return;
     }
     if (!floorPlan) {
@@ -199,7 +215,7 @@ export default function MeetingRoomFormModal({
 
   const handleUploadFloorPlan = () => {
     if (!floorCtx) {
-      message.warning('请先填写包含楼栋与楼层信息的地址');
+      warnMissingFloorContext();
       return;
     }
     setFloorPlanPickerMode('upload');
@@ -215,10 +231,6 @@ export default function MeetingRoomFormModal({
   };
 
   const handleOpenCoverPicker = () => {
-    if (!floorCtx) {
-      message.warning('请先填写包含楼栋与楼层信息的地址');
-      return;
-    }
     setPickerOpen(true);
   };
 
@@ -395,7 +407,7 @@ export default function MeetingRoomFormModal({
                 </div>
                 {!floorCtx ? (
                   <div className="meeting-room-floor-plan-empty meeting-room-media-panel">
-                    填写地址后可管理该楼层的平面图（与小程序平面图页共用，与封面互不影响）
+                    选择空间位置（至少到楼层）后可管理平面图；与封面互不影响，可先传平面图或跳过封面
                   </div>
                 ) : (
                   <div className={`meeting-room-floor-plan-panel meeting-room-media-panel${floorPlan ? ' has-plan' : ''}`}>
@@ -429,7 +441,7 @@ export default function MeetingRoomFormModal({
                     ) : (
                       <div className="meeting-room-floor-plan-empty-panel">
                         <div className="meeting-room-floor-plan-tip">
-                          该楼层尚未上传平面图。首个会议室需先上传平面图，同楼层后续会议室将自动共用。
+                          该楼层尚未上传平面图。同楼层会议室将共用一张平面图，与是否上传封面无关。
                         </div>
                         <Button type="primary" icon={<UploadOutlined />} onClick={handleUploadFloorPlan}>
                           上传楼层平面图
@@ -517,8 +529,8 @@ export default function MeetingRoomFormModal({
       <DocumentImagePickerModal
         open={pickerOpen}
         title={cover ? '更换会议室封面' : '上传会议室封面'}
-        expectedBuilding={floorCtx?.building}
-        expectedFloor={floorCtx?.floor}
+        expectedBuilding={pickerBuilding}
+        expectedFloor={pickerFloor}
         initialSelection={
           cover
             ? {
@@ -530,7 +542,23 @@ export default function MeetingRoomFormModal({
         }
         onCancel={() => setPickerOpen(false)}
         onConfirm={(selection) => {
-          setCover(toCoverSelection(selection));
+          const prevCtx = resolveMeetingRoomFloorContext({
+            spaceLocation,
+            address,
+            cover,
+            building: record?.building,
+          });
+          const nextCover = toCoverSelection(selection);
+          const nextCtx = resolveMeetingRoomFloorContext({
+            spaceLocation,
+            address,
+            cover: nextCover,
+            building: record?.building,
+          });
+          setCover(nextCover);
+          if (prevCtx?.floorKey !== nextCtx?.floorKey) {
+            setPlanPoint(null);
+          }
           setPickerOpen(false);
         }}
       />
