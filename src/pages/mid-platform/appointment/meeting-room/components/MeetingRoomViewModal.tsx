@@ -44,10 +44,6 @@ export default function MeetingRoomViewModal({
 
   if (!record) return null;
 
-  const spaceLocation = record.spaceLocation.includes('|')
-    ? record.spaceLocation.split('|')[0]?.trim()
-    : record.spaceLocation;
-
   const floorCtx = resolveMeetingRoomFloorContext({
     building: record.building,
     spaceLocation: record.spaceLocation,
@@ -72,7 +68,7 @@ export default function MeetingRoomViewModal({
             <div className="meeting-room-form-section-title">基本信息</div>
             <div className="mid-platform-meeting-view-grid">
               <div className="meeting-room-view-grid">
-                <ViewField label="空间位置" value={spaceLocation} />
+                <ViewField label="空间位置" value={record.spaceLocation} />
                 <ViewField label="地址" value={record.address} />
                 <ViewField label="会议室编号" value={record.roomNo} />
                 <ViewField label="会议室名称" value={record.name} />
@@ -135,17 +131,15 @@ export default function MeetingRoomViewModal({
                   </span>
                 </div>
               )}
-              {record.status !== 'disabled' && (
-                <ViewField
-                  label="使用权限"
-                  value={
-                    <Radio.Group value={record.usagePermission} disabled>
-                      <Radio value="unlimited">不限</Radio>
-                      <Radio value="restricted">限制人群使用</Radio>
-                    </Radio.Group>
-                  }
-                />
-              )}
+              <ViewField
+                label="使用权限"
+                value={
+                  <Radio.Group value={record.usagePermission} disabled>
+                    <Radio value="unlimited">不限</Radio>
+                    <Radio value="restricted">限制人群使用</Radio>
+                  </Radio.Group>
+                }
+              />
               <ViewField
                 label="设备"
                 value={

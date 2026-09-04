@@ -192,6 +192,44 @@
   color: rgba(0, 0, 0, 0.45);
 }
 
+.meeting-room-media-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.meeting-room-media-row .meeting-room-form-subsection {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.meeting-room-media-panel {
+  flex: 1;
+  min-height: 160px;
+}
+
+.meeting-room-media-row .meeting-room-cover-panel,
+.meeting-room-media-row .meeting-room-floor-plan-panel,
+.meeting-room-media-row .meeting-room-floor-plan-empty,
+.meeting-room-media-row .meeting-room-floor-plan-empty-panel {
+  height: 100%;
+}
+
+.meeting-room-media-row .meeting-room-cover-panel,
+.meeting-room-media-row .meeting-room-floor-plan-panel {
+  flex-direction: column;
+}
+
+.meeting-room-media-row .meeting-room-cover-panel-media,
+.meeting-room-media-row .meeting-room-floor-plan-preview {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 120px;
+}
+
 .meeting-room-floor-plan-panel {
   display: flex;
   gap: 16px;

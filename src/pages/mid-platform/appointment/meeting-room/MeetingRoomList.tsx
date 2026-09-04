@@ -35,6 +35,7 @@ import {
   MEETING_ROOM_BUILDING_OPTIONS,
 } from '../../../../data/mockMidPlatformMeetingRooms';
 import { useMeetingRoomStore } from '../../../../store/meetingRoomStore';
+import { resolveBuildingFromSpaceLocation } from '../../../../data/meetingRoomSpaceOptions';
 import MeetingRoomFormModal from './components/MeetingRoomFormModal';
 import MeetingRoomViewModal from './components/MeetingRoomViewModal';
 import MeetingRoomPermissionModal from './components/MeetingRoomPermissionModal';
@@ -124,11 +125,7 @@ export default function MeetingRoomList() {
       ? [equipmentValue]
       : [];
     const spaceLocation = values.spaceLocation as string;
-    const building = spaceLocation.includes('1#')
-      ? '综合办公楼1#'
-      : spaceLocation.includes('8#')
-        ? '分子医学楼8#'
-        : '综合办公楼2#';
+    const building = resolveBuildingFromSpaceLocation(spaceLocation);
 
     if (formModal.mode === 'edit' && formModal.record) {
       upsertMeetingRoom({
@@ -144,7 +141,7 @@ export default function MeetingRoomList() {
         status: values.status as MidPlatformMeetingRoom['status'],
         usagePermission: values.usagePermission as MidPlatformMeetingRoom['usagePermission'],
         authorizedUserIds:
-          values.status !== 'disabled' && values.usagePermission === 'restricted'
+          values.usagePermission === 'restricted'
             ? ((values.authorizedUserIds as string[]) ?? [])
             : [],
         description: values.description as string,
@@ -167,7 +164,7 @@ export default function MeetingRoomList() {
         status: values.status as MidPlatformMeetingRoom['status'],
         usagePermission: values.usagePermission as MidPlatformMeetingRoom['usagePermission'],
         authorizedUserIds:
-          values.status !== 'disabled' && values.usagePermission === 'restricted'
+          values.usagePermission === 'restricted'
             ? ((values.authorizedUserIds as string[]) ?? [])
             : [],
         description: values.description as string,

@@ -30,9 +30,14 @@ export function resolveMeetingRoomBuilding(input: {
 
 export function resolveMeetingRoomFloor(input: {
   address?: string;
+  spaceLocation?: string;
   cover?: { floor?: string } | null;
 }): string {
   if (input.cover?.floor?.trim()) return input.cover.floor.trim();
+  if (input.spaceLocation?.includes('|')) {
+    const floor = input.spaceLocation.split('|')[1]?.trim();
+    if (floor) return floor;
+  }
   if (input.address) return parseFloorFromAddress(input.address);
   return '';
 }
