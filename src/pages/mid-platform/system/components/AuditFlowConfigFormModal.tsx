@@ -10,18 +10,14 @@ import type {
   AuditFlowApproverType,
   AuditFlowCondition,
   AuditFlowConfig,
-  AuditFlowOrgScope,
   AuditFlowSignType,
 } from '../../../../types/auditFlowConfig';
-import { getOrgValueOptions } from '../../../../data/auditFlowOptions';
 import {
   APPROVER_NAME_OPTIONS,
   APPROVE_MODE_OPTIONS,
-  CONDITION_TYPE_OPTIONS,
   MATCH_TYPE_OPTIONS,
   ORG_ENTITY_OPTIONS,
   ORG_LEVEL_OPTIONS,
-  ORG_SCOPE_OPTIONS,
   PROCESS_TYPE_OPTIONS,
   getRoomOptions,
 } from '../../../../data/mockAuditFlowConfig';
@@ -35,6 +31,7 @@ import {
   createAutoApproverStep,
   createDefaultApproverStep,
 } from '../../../../utils/auditFlowApproverSteps';
+import AuditFlowConditionsEditor from './AuditFlowConditionsEditor';
 import { ORG_ADMIN_SCOPE_LABEL } from '../../../../data/auditFlowOptions';
 import '../AuditFlowConfig.css';
 
@@ -45,12 +42,6 @@ interface AuditFlowConfigFormModalProps {
   onCancel: () => void;
   onSubmit: (values: Record<string, unknown>) => void;
 }
-
-const SELECT_PROPS = {
-  allowClear: true,
-  showSearch: true,
-  optionFilterProp: 'label' as const,
-};
 
 export default function AuditFlowConfigFormModal({
   open,
@@ -262,135 +253,8 @@ export default function AuditFlowConfigFormModal({
             )}
           </div>
 
-          <div className="audit-flow-conditions-block">
-            <div className="audit-flow-conditions-head">
-              <span className="audit-flow-conditions-title">匹配条件（且关系）</span>
-              {!isDefault && (
-                <span className="audit-flow-conditions-hint">非默认流程需至少配置一条条件</span>
-              )}
-            </div>
-            <Form.List
-              name="conditions"
-              rules={[
-                {
-                  validator: async (_, value: AuditFlowCondition[] | undefined) => {
-                    if (form.getFieldValue('isDefault')) return;
-                    if (!value || value.length === 0) {
-                      throw new Error('请添加至少一条匹配条件');
-                    }
-                  },
-                },
-              ]}
-            >
-              {(fields, { add, remove }) => (
-                <>
-                  {fields.map(({ key, name, ...restField }) => (
-                    <div key={key} className="audit-flow-condition-row">
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'type']}
-                        rules={[{ required: true, message: '请选择条件类型' }]}
-                        className="audit-flow-condition-type"
-                      >
-                        <Select
-                          placeholder="条件类型"
-                          options={CONDITION_TYPE_OPTIONS}
-                          onChange={(value) => {
-                            if (value === 'org') {
-                              form.setFieldValue(['conditions', name, 'orgScope'], 'company');
-                            } else {
-                              form.setFieldValue(['conditions', name, 'orgScope'], undefined);
-                            }
-                            form.setFieldValue(['conditions', name, 'values'], []);
-                          }}
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        noStyle
-                        shouldUpdate={(prev, cur) =>
-                          prev.conditions?.[name]?.type !== cur.conditions?.[name]?.type
-                        }
-                      >
-                        {() => {
-                          const type = form.getFieldValue(['conditions', name, 'type']) as
-                            | string
-                            | undefined;
-                          if (type !== 'org') return null;
-                          return (
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'orgScope']}
-                              rules={[{ required: true, message: '请选择组织层级' }]}
-                              className="audit-flow-condition-scope"
-                            >
-                              <Select
-                                placeholder="组织层级"
-                                options={ORG_SCOPE_OPTIONS}
-                                onChange={() => {
-                                  form.setFieldValue(['conditions', name, 'values'], []);
-                                }}
-                              />
-                            </Form.Item>
-                          );
-                        }}
-                      </Form.Item>
-                      <Form.Item
-                        noStyle
-                        shouldUpdate={(prev, cur) => {
-                          const prevC = prev.conditions?.[name];
-                          const curC = cur.conditions?.[name];
-                          return prevC?.type !== curC?.type || prevC?.orgScope !== curC?.orgScope;
-                        }}
-                      >
-                        {() => {
-                          const type = form.getFieldValue(['conditions', name, 'type']) as
-                            | string
-                            | undefined;
-                          const orgScope = form.getFieldValue([
-                            'conditions',
-                            name,
-                            'orgScope',
-                          ]) as AuditFlowOrgScope | undefined;
-                          const options =
-                            type === 'room' ? roomOptions : getOrgValueOptions(orgScope);
-                          return (
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'values']}
-                              rules={[{ required: true, message: '请选择匹配值' }]}
-                              className="audit-flow-condition-value"
-                            >
-                              <Select
-                                {...SELECT_PROPS}
-                                mode="multiple"
-                                placeholder="请选择匹配值（可多选）"
-                                options={options}
-                                maxTagCount="responsive"
-                              />
-                            </Form.Item>
-                          );
-                        }}
-                      </Form.Item>
-                      <Button
-                        size="small"
-                        icon={<MinusOutlined />}
-                        className="audit-flow-btn-minus audit-flow-condition-remove"
-                        onClick={() => remove(name)}
-                      />
-                    </div>
-                  ))}
-                  <Button
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    onClick={() => add({ type: 'org', orgScope: 'company', values: [] })}
-                    className="audit-flow-add-condition-btn"
-                  >
-                    添加条件
-                  </Button>
-                </>
-              )}
-            </Form.List>
-          </div>
+          <AuditFlowConditionsEditor form={form} isDefault={Boolean(isDefault)} roomOptions={roomOptions} />
+
         </section>
 
         <section className="audit-flow-form-section">

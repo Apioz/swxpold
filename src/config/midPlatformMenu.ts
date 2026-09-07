@@ -11,6 +11,8 @@ export const midPlatformRouteTitleMap: Record<string, string> = {
   '/mid-platform/appointment/meeting-rooms/reservations': '会议预约',
   '/mid-platform/appointment/meeting-rooms/audit': '会议审核',
   '/mid-platform/appointment/meeting-rooms/records': '会议记录',
+  '/mid-platform/system/audit-flow': '审核流程配置',
+  '/mid-platform/system/reservation-limits': '预约占用限制配置',
 };
 
 export const midPlatformMenuItems: MenuItem[] = [
@@ -52,6 +54,14 @@ export const midPlatformMenuItems: MenuItem[] = [
   },
   { key: '/mid-platform/crm', label: 'CRM平台' },
   { key: '/mid-platform/incubation', label: '孵化平台' },
+  {
+    key: 'mid-system',
+    label: '系统配置',
+    children: [
+      { key: '/mid-platform/system/audit-flow', label: '审核流程配置' },
+      { key: '/mid-platform/system/reservation-limits', label: '预约占用限制配置' },
+    ],
+  },
 ];
 
 export function getMidPlatformOpenKeys(path: string): string[] {
@@ -63,6 +73,9 @@ export function getMidPlatformOpenKeys(path: string): string[] {
   }
   if (path.startsWith('/mid-platform/operations')) {
     return ['mid-operations'];
+  }
+  if (path.startsWith('/mid-platform/system')) {
+    return ['mid-system'];
   }
   return [];
 }
@@ -91,6 +104,12 @@ export function getMidPlatformSelectedKey(path: string): string {
   }
   if (path.startsWith('/mid-platform/appointment/visitors')) {
     return '/mid-platform/appointment/visitors';
+  }
+  if (path.startsWith('/mid-platform/system/reservation-limits')) {
+    return '/mid-platform/system/reservation-limits';
+  }
+  if (path.startsWith('/mid-platform/system/audit-flow')) {
+    return '/mid-platform/system/audit-flow';
   }
   return path;
 }

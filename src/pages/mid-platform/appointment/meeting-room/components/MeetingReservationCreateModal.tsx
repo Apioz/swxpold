@@ -35,6 +35,7 @@ import {
 import {
   submitRecurringMeeting,
   submitStandardMeeting,
+  ReservationLimitError,
 } from '../../../../../data/meetingSubmissionStore';
 import { WEEKDAY_OPTIONS } from '../../../../mini-program/meeting-room/MeetingRoomBook';
 import MeetingReservationStatusTimeline from './MeetingReservationStatusTimeline';
@@ -159,20 +160,28 @@ export default function MeetingReservationCreateModal({
     );
 
     const doSubmit = () => {
-      submitRecurringMeeting({
-        roomId: room.id,
-        roomName: room.roomNo,
-        address: room.address,
-        title: values.title as string,
-        description: values.requirements as string,
-        recurrenceStartDate: startDate.format('YYYY-MM-DD'),
-        recurrenceEndDate: endDate.format('YYYY-MM-DD'),
-        recurrenceWeekdays: weekdays,
-        recurrenceWeekdaysLabel: weekdayLabels,
-        selectedSlots,
-      });
-      message.success('周期预约提交成功');
-      onSuccess();
+      try {
+        submitRecurringMeeting({
+          roomId: room.id,
+          roomName: room.roomNo,
+          address: room.address,
+          title: values.title as string,
+          description: values.requirements as string,
+          recurrenceStartDate: startDate.format('YYYY-MM-DD'),
+          recurrenceEndDate: endDate.format('YYYY-MM-DD'),
+          recurrenceWeekdays: weekdays,
+          recurrenceWeekdaysLabel: weekdayLabels,
+          selectedSlots,
+        });
+        message.success('周期预约提交成功');
+        onSuccess();
+      } catch (error) {
+        if (error instanceof ReservationLimitError) {
+          message.error(error.message);
+          return;
+        }
+        throw error;
+      }
     };
 
     if (conflictDates.length > 0) {
@@ -213,17 +222,25 @@ export default function MeetingReservationCreateModal({
         }
 
         const selectedSlots = buildSlotsFromTimeRange(date, start, end);
-        submitStandardMeeting({
-          roomId: room.id,
-          roomName: room.roomNo,
-          address: room.address,
-          title: values.title as string,
-          description: values.requirements as string,
-          selectedSlots,
-          activeDate: date,
-          participants: participantNames,
-          participantCount: participantIds.length,
-        });
+        try {
+          submitStandardMeeting({
+            roomId: room.id,
+            roomName: room.roomNo,
+            address: room.address,
+            title: values.title as string,
+            description: values.requirements as string,
+            selectedSlots,
+            activeDate: date,
+            participants: participantNames,
+            participantCount: participantIds.length,
+          });
+        } catch (error) {
+          if (error instanceof ReservationLimitError) {
+            message.error(error.message);
+            return;
+          }
+          throw error;
+        }
         message.success('预约提交成功');
         onSuccess();
         return;

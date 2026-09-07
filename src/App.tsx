@@ -35,7 +35,7 @@ import MidPlatformPersonnelManagement from './pages/mid-platform/operations/Pers
 import OperationsHome from './pages/mid-platform/operations/OperationsHome';
 import MeetingRoomListPage from './pages/mid-platform/appointment/meeting-room/MeetingRoomList';
 import MeetingReservationList from './pages/mid-platform/appointment/meeting-room/MeetingReservationList';
-import AuditFlowConfigList from './pages/mid-platform/system/AuditFlowConfigList';
+import SystemFlowConfigPage from './pages/mid-platform/system/SystemFlowConfigPage';
 import FoundationLayout from './layouts/FoundationLayout';
 import SpaceCenter from './pages/foundation/space-center/SpaceCenter';
 import DocumentCenter from './pages/foundation/document-center/DocumentCenter';
@@ -228,7 +228,8 @@ function App() {
               path="system/params"
               element={<PlaceholderPage title="参数管理" />}
             />
-            <Route path="system/audit-flow" element={<AuditFlowConfigList />} />
+            <Route path="system/audit-flow" element={<SystemFlowConfigPage />} />
+            <Route path="system/reservation-limits" element={<SystemFlowConfigPage />} />
             <Route
               path="task"
               element={<PlaceholderPage title="任务管理" />}
@@ -269,6 +270,8 @@ function App() {
               path="appointment/meeting-rooms/records"
               element={<PlaceholderPage title="会议记录" />}
             />
+            <Route path="system/audit-flow" element={<SystemFlowConfigPage />} />
+            <Route path="system/reservation-limits" element={<SystemFlowConfigPage />} />
           </Route>
           <Route path="/foundation" element={<FoundationLayout />}>
             <Route index element={<Navigate to="/foundation/space-center" replace />} />

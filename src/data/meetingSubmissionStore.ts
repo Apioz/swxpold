@@ -1,6 +1,13 @@
 import { getAuditFlowConfigs } from '../store/auditFlowConfigStore';
+import { getReservationLimitConfigs } from '../store/reservationLimitConfigStore';
 import { resolveAuditApprovalPlan } from '../utils/auditFlowMatcher';
+import {
+  ReservationLimitError,
+  getReservationLimitDisplayName,
+  validateReservationLimits,
+} from '../utils/reservationLimitMatcher';
 import type { MeetingAuditItem, MeetingReservation } from './mockMeetingRooms';
+import { myReservations } from './mockMeetingRooms';
 import { buildMeetingApplicantContext, meetingCurrentUser } from './meetingCurrentUser';
 import {
   expandRecurringToStandardReservations,
@@ -65,7 +72,14 @@ function buildApplicantFields() {
   return {
     applicantId: meetingCurrentUser.id,
     applicantName: meetingCurrentUser.name,
+    applicantCompany: meetingCurrentUser.company,
   };
+}
+
+interface SubmissionLimitMeta {
+  matchedLimitRuleId?: string;
+  matchedLimitRuleName?: string;
+  limitViolationApproverNames?: string[];
 }
 
 interface SubmissionAuditOutcome {
@@ -77,13 +91,92 @@ interface SubmissionAuditOutcome {
     matchedAuditFlowId?: string;
     matchedAuditFlowName?: string;
   };
+  limitMeta?: SubmissionLimitMeta;
   approverNames?: string[];
   approveMode?: 'auto' | 'manual';
   autoApproverScopeLabel?: string;
 }
 
+function getExistingReservationsForLimitCheck(): MeetingReservation[] {
+  return [...myReservations, ...dynamicReservations];
+}
+
+function resolveLimitCheck(
+  payload: Pick<
+    RecurringSubmitPayload | StandardSubmitPayload,
+    'roomId' | 'roomName' | 'selectedSlots'
+  > & {
+    activeDate?: string;
+    recurrenceStartDate?: string;
+    recurrenceEndDate?: string;
+    recurrenceWeekdays?: number[];
+  },
+): SubmissionLimitMeta | undefined {
+  const applicant = buildMeetingApplicantContext();
+  const limitResult = validateReservationLimits(
+    getReservationLimitConfigs(),
+    {
+      ...applicant,
+      roomId: payload.roomId,
+      roomName: payload.roomName,
+      selectedSlots: payload.selectedSlots,
+      activeDate: payload.activeDate,
+      recurrenceStartDate: payload.recurrenceStartDate,
+      recurrenceEndDate: payload.recurrenceEndDate,
+      recurrenceWeekdays: payload.recurrenceWeekdays,
+    },
+    getExistingReservationsForLimitCheck(),
+  );
+
+  if (limitResult.action === 'reject') {
+    const ruleName = limitResult.matchedRule
+      ? getReservationLimitDisplayName(limitResult.matchedRule)
+      : '占用限制';
+    throw new ReservationLimitError(
+      `${ruleName}：${limitResult.messages.join('；')}`,
+    );
+  }
+
+  if (limitResult.action === 'requireApproval' && limitResult.matchedRule) {
+    return {
+      matchedLimitRuleId: limitResult.matchedRule.id,
+      matchedLimitRuleName: getReservationLimitDisplayName(limitResult.matchedRule),
+      limitViolationApproverNames: limitResult.limitApproverNames,
+    };
+  }
+
+  if (limitResult.matchedRule) {
+    return {
+      matchedLimitRuleId: limitResult.matchedRule.id,
+      matchedLimitRuleName: getReservationLimitDisplayName(limitResult.matchedRule),
+    };
+  }
+
+  return undefined;
+}
+
+function mergeApproverNames(
+  auditNames: string[] | undefined,
+  limitNames: string[] | undefined,
+): string[] | undefined {
+  const merged = [...new Set([...(auditNames ?? []), ...(limitNames ?? [])].filter(Boolean))];
+  return merged.length > 0 ? merged : undefined;
+}
+
+function buildLimitRecordFields(limitMeta?: SubmissionLimitMeta) {
+  if (!limitMeta) return {};
+  return {
+    matchedLimitRuleId: limitMeta.matchedLimitRuleId,
+    matchedLimitRuleName: limitMeta.matchedLimitRuleName,
+    limitViolationApproverNames: limitMeta.limitViolationApproverNames,
+  };
+}
+
 function buildAuditRecordFields(outcome: SubmissionAuditOutcome) {
-  const fields = { ...outcome.matchedFlowMeta } as Record<string, unknown>;
+  const fields = {
+    ...outcome.matchedFlowMeta,
+    ...buildLimitRecordFields(outcome.limitMeta),
+  } as Record<string, unknown>;
   if (outcome.approverNames?.length) {
     if (outcome.approveMode === 'auto') {
       fields.approvedByNames = outcome.approverNames;
@@ -97,7 +190,11 @@ function buildAuditRecordFields(outcome: SubmissionAuditOutcome) {
   return fields;
 }
 
-function resolveSubmissionAuditOutcome(roomId: string, roomName: string): SubmissionAuditOutcome {
+function resolveSubmissionAuditOutcome(
+  roomId: string,
+  roomName: string,
+  limitMeta?: SubmissionLimitMeta,
+): SubmissionAuditOutcome {
   const plan = resolveAuditApprovalPlan(getAuditFlowConfigs(), {
     processType: '会议室预约',
     roomId,
@@ -113,9 +210,12 @@ function resolveSubmissionAuditOutcome(roomId: string, roomName: string): Submis
       }
     : {};
 
-  const approverNames = plan.approverNames;
+  const approverNames = mergeApproverNames(
+    plan.approverNames,
+    limitMeta?.limitViolationApproverNames,
+  );
 
-  if (plan.approveMode === 'auto') {
+  if (plan.approveMode === 'auto' && !limitMeta?.limitViolationApproverNames?.length) {
     const scopeLabel = plan.approverScopeLabel ?? '组织管理员';
     return {
       reservationStatus: 'completed',
@@ -123,24 +223,39 @@ function resolveSubmissionAuditOutcome(roomId: string, roomName: string): Submis
       auditStatus: 'approved',
       auditStatusLabel: `${scopeLabel}已自动通过`,
       matchedFlowMeta,
+      limitMeta,
       approverNames,
       approveMode: 'auto',
       autoApproverScopeLabel: scopeLabel,
     };
   }
 
+  const statusLabel = limitMeta?.limitViolationApproverNames?.length
+    ? '占用超限审批中'
+    : '审批中';
+
   return {
     reservationStatus: 'processing',
-    reservationStatusLabel: '审批中',
+    reservationStatusLabel: statusLabel,
     auditStatus: 'pending',
-    auditStatusLabel: '待审批',
+    auditStatusLabel: statusLabel,
     matchedFlowMeta,
+    limitMeta,
     approverNames,
     approveMode: 'manual',
   };
 }
 
 export function submitRecurringMeeting(payload: RecurringSubmitPayload): RecurringSubmitResult {
+  const limitMeta = resolveLimitCheck({
+    roomId: payload.roomId,
+    roomName: payload.roomName,
+    selectedSlots: payload.selectedSlots,
+    recurrenceStartDate: payload.recurrenceStartDate,
+    recurrenceEndDate: payload.recurrenceEndDate,
+    recurrenceWeekdays: payload.recurrenceWeekdays,
+  });
+
   const excludedDates = findRecurringConflictDates(
     payload.roomId,
     payload.recurrenceStartDate,
@@ -153,7 +268,7 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
   const auditId = nextId('audit-recurring-pending');
   const timeSlot = formatMeetingTimeRange(payload.selectedSlots).replace('-', ' - ');
   const applicant = buildApplicantFields();
-  const auditOutcome = resolveSubmissionAuditOutcome(payload.roomId, payload.roomName);
+  const auditOutcome = resolveSubmissionAuditOutcome(payload.roomId, payload.roomName, limitMeta);
 
   const reservation: MeetingReservation = {
     id: reservationId,
@@ -200,6 +315,13 @@ export function submitRecurringMeeting(payload: RecurringSubmitPayload): Recurri
 }
 
 export function submitStandardMeeting(payload: StandardSubmitPayload): StandardSubmitResult {
+  const limitMeta = resolveLimitCheck({
+    roomId: payload.roomId,
+    roomName: payload.roomName,
+    selectedSlots: payload.selectedSlots,
+    activeDate: payload.activeDate,
+  });
+
   const reservationId = nextId('res-standard-processing');
   const auditId = nextId('audit-standard-pending');
   const timeRange = formatMeetingTimeRange(payload.selectedSlots);
@@ -207,7 +329,7 @@ export function submitStandardMeeting(payload: StandardSubmitPayload): StandardS
     ? `${payload.activeDate} ${timeRange.split('-')[0]?.trim() ?? '09:00'}:00`
     : '';
   const applicant = buildApplicantFields();
-  const auditOutcome = resolveSubmissionAuditOutcome(payload.roomId, payload.roomName);
+  const auditOutcome = resolveSubmissionAuditOutcome(payload.roomId, payload.roomName, limitMeta);
 
   const reservation: MeetingReservation = {
     id: reservationId,
@@ -320,3 +442,5 @@ export function getExpandedReservationsForAudit(audit: MeetingAuditItem): Meetin
   expandedByAudit.set(audit.id, expanded);
   return expanded;
 }
+
+export { ReservationLimitError } from '../utils/reservationLimitMatcher';

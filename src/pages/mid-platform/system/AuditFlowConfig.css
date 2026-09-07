@@ -114,13 +114,12 @@
 }
 
 .audit-flow-condition-type {
-  flex: 0 0 120px;
+  flex: 0 0 148px;
   margin-bottom: 0;
 }
 
-.audit-flow-condition-scope {
-  flex: 0 0 110px;
-  margin-bottom: 0;
+.audit-flow-condition-type .ant-select {
+  width: 100%;
 }
 
 .audit-flow-condition-value {
@@ -152,6 +151,17 @@
   margin-bottom: 8px;
   color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
+}
+
+.audit-flow-approver-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.audit-flow-approver-step-header .audit-flow-approver-step-index {
+  margin-bottom: 0;
 }
 
 .audit-flow-approver-multi-hint {
@@ -333,4 +343,42 @@
 .mid-platform-audit-flow-view-modal .ant-modal-footer {
   padding: 12px 24px 16px;
   border-top: 1px solid #f0f0f0;
+}
+
+.system-flow-config-page .ant-tabs-nav {
+  margin-bottom: 0;
+  padding: 0 16px;
+  background: #fff;
+}
+
+.system-flow-config-header {
+  padding: 16px 16px 0;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.system-flow-config-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.system-flow-config-desc {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1.6;
+}
+
+.mid-platform-page--embedded {
+  padding-top: 0;
+}
+
+.mid-platform-page--embedded .mid-platform-search-card {
+  margin-top: 16px;
+}
+
+.reservation-limit-fields .ant-form-item {
+  margin-bottom: 12px;
 }

@@ -52,9 +52,16 @@ export interface MeetingReservation {
   /** 申请人 id */
   applicantId: string;
   applicantName?: string;
+  /** 申请人所属企业（占用限制统计用） */
+  applicantCompany?: string;
   /** 命中的审核流程规则 */
   matchedAuditFlowId?: string;
   matchedAuditFlowName?: string;
+  /** 命中的占用限制规则 */
+  matchedLimitRuleId?: string;
+  matchedLimitRuleName?: string;
+  /** 占用超限触发的额外审批人 */
+  limitViolationApproverNames?: string[];
   /** 待审批人（审批中时有值） */
   pendingApproverNames?: string[];
   /** 自动审批通过时的审批人 */

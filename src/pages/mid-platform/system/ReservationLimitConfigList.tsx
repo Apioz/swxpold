@@ -14,46 +14,41 @@ import {
 } from '@ant-design/icons';
 import { Button, Form, Modal, Radio, Select, Space, Switch, Table, Tag, message } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import type { AuditFlowCondition, AuditFlowConfig } from '../../../types/auditFlowConfig';
+import type { AuditFlowCondition } from '../../../types/auditFlowConfig';
+import type { ReservationLimitConfig } from '../../../types/reservationLimitConfig';
+import { VIOLATION_ACTION_OPTIONS } from '../../../data/mockReservationLimitConfig';
 import {
-  APPROVE_MODE_OPTIONS,
-  PROCESS_TYPE_OPTIONS,
-} from '../../../data/mockAuditFlowConfig';
+  setReservationLimitConfigs,
+  useReservationLimitConfigs,
+} from '../../../store/reservationLimitConfigStore';
 import {
-  setAuditFlowConfigs,
-  useAuditFlowConfigs,
-} from '../../../store/auditFlowConfigStore';
+  buildReservationLimitDefaultName,
+  findDuplicateReservationLimitRule,
+  formatLimitsSummary,
+  getReservationLimitDisplayName,
+} from '../../../utils/reservationLimitMatcher';
 import {
-  buildAuditFlowDefaultName,
-  findDuplicateAuditFlow,
+  computeAuditFlowPriority,
   formatConditionsSummary,
-  getAuditFlowDisplayName,
-  getAuditFlowMatchWeight,
   normalizeAuditFlowCondition,
 } from '../../../utils/auditFlowMatcher';
 import {
   normalizeFormApproverSteps,
   validateApproverSteps,
 } from '../../../utils/auditFlowApproverSteps';
-import AuditFlowConfigFormModal from './components/AuditFlowConfigFormModal';
-import AuditFlowConfigViewModal from './components/AuditFlowConfigViewModal';
+import ReservationLimitConfigFormModal from './components/ReservationLimitConfigFormModal';
+import ReservationLimitConfigViewModal from './components/ReservationLimitConfigViewModal';
 import '../MidPlatformPages.css';
 import './AuditFlowConfig.css';
 
 interface SearchForm {
-  processType?: string;
-  approveMode?: string;
+  violationAction?: string;
   isDefault?: boolean;
   enabled?: boolean;
 }
 
-interface AuditFlowConfigListProps {
+interface ReservationLimitConfigListProps {
   embedded?: boolean;
-}
-
-function renderApproveMode(mode: AuditFlowConfig['approveMode']) {
-  const label = APPROVE_MODE_OPTIONS.find((item) => item.value === mode)?.label ?? mode;
-  return mode === 'auto' ? <Tag color="green">{label.split('（')[0]}</Tag> : label.split('（')[0];
 }
 
 function normalizeFormConditions(raw: unknown): AuditFlowCondition[] {
@@ -63,8 +58,13 @@ function normalizeFormConditions(raw: unknown): AuditFlowCondition[] {
     .filter((item) => item.values.length > 0);
 }
 
-export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListProps) {
-  const list = useAuditFlowConfigs();
+function renderViolationAction(action: ReservationLimitConfig['violationAction']) {
+  const label = VIOLATION_ACTION_OPTIONS.find((item) => item.value === action)?.label ?? action;
+  return action === 'requireApproval' ? <Tag color="orange">{label}</Tag> : <Tag>{label}</Tag>;
+}
+
+export default function ReservationLimitConfigList({ embedded }: ReservationLimitConfigListProps) {
+  const list = useReservationLimitConfigs();
   const [search, setSearch] = useState<SearchForm>({});
   const [form] = Form.useForm<SearchForm>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
@@ -79,18 +79,15 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
   const [formModal, setFormModal] = useState<{
     open: boolean;
     mode: 'add' | 'edit' | 'copy';
-    record: AuditFlowConfig | null;
+    record: ReservationLimitConfig | null;
   }>({ open: false, mode: 'add', record: null });
-  const [viewRecord, setViewRecord] = useState<AuditFlowConfig | null>(null);
+  const [viewRecord, setViewRecord] = useState<ReservationLimitConfig | null>(null);
 
   const tableData = useMemo(() => {
     let data = list;
 
-    if (search.processType) {
-      data = data.filter((item) => item.processType === search.processType);
-    }
-    if (search.approveMode) {
-      data = data.filter((item) => item.approveMode === search.approveMode);
+    if (search.violationAction) {
+      data = data.filter((item) => item.violationAction === search.violationAction);
     }
     if (search.isDefault === true) {
       data = data.filter((item) => item.isDefault);
@@ -105,24 +102,26 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
       data = data.filter((item) => !item.enabled);
     }
 
-    return [...data].sort((a, b) => getAuditFlowMatchWeight(b) - getAuditFlowMatchWeight(a));
+    return [...data].sort(
+      (a, b) => computeAuditFlowPriority(b.conditions, b.isDefault) - computeAuditFlowPriority(a.conditions, a.isDefault),
+    );
   }, [list, search]);
 
-  const handleToggleEnabled = (record: AuditFlowConfig, enabled: boolean) => {
-    setAuditFlowConfigs(
+  const handleToggleEnabled = (record: ReservationLimitConfig, enabled: boolean) => {
+    setReservationLimitConfigs(
       list.map((item) => (item.id === record.id ? { ...item, enabled } : item)),
     );
     message.success(enabled ? '已启用' : '已禁用');
   };
 
-  const handleDelete = (record: AuditFlowConfig) => {
+  const handleDelete = (record: ReservationLimitConfig) => {
     Modal.confirm({
       title: '温馨提示',
-      content: `确认删除该审核流程配置吗？`,
+      content: '确认删除该占用限制配置吗？',
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        setAuditFlowConfigs(list.filter((item) => item.id !== record.id));
+        setReservationLimitConfigs(list.filter((item) => item.id !== record.id));
         setSelectedRowKeys((keys) => keys.filter((key) => key !== record.id));
         message.success('删除成功');
       },
@@ -140,7 +139,7 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        setAuditFlowConfigs(list.filter((item) => !selectedRowKeys.includes(item.id)));
+        setReservationLimitConfigs(list.filter((item) => !selectedRowKeys.includes(item.id)));
         setSelectedRowKeys([]);
         message.success('删除成功');
       },
@@ -150,67 +149,63 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
   const handleFormSubmit = (values: Record<string, unknown>) => {
     const conditions = normalizeFormConditions(values.conditions);
     const isDefault = values.isDefault as boolean;
-    const processType = values.processType as AuditFlowConfig['processType'];
     const editingId = formModal.mode === 'edit' ? formModal.record?.id : undefined;
+    const violationAction = values.violationAction as ReservationLimitConfig['violationAction'];
 
-    if (values.selfApplyAutoPass && values.stackable) {
-      message.error(
-        '「管理员自审自动通过」与「叠加审批」不能同时开启，请拆分为两条规则分别配置',
-      );
-      return;
+    const approverSteps = normalizeFormApproverSteps(values.approverSteps, 'manual');
+    if (violationAction === 'requireApproval') {
+      const approverValidationError = validateApproverSteps(approverSteps, 'manual');
+      if (approverValidationError) {
+        message.error(approverValidationError);
+        return;
+      }
     }
 
-    const approveMode = values.approveMode as AuditFlowConfig['approveMode'];
-    const approverSteps = normalizeFormApproverSteps(values.approverSteps, approveMode);
-    const approverValidationError = validateApproverSteps(approverSteps, approveMode);
-    if (approverValidationError) {
-      message.error(approverValidationError);
-      return;
-    }
-
-    const duplicate = findDuplicateAuditFlow(list, {
+    const duplicate = findDuplicateReservationLimitRule(list, {
       id: editingId,
-      processType,
       conditions,
       isDefault,
     });
     if (duplicate) {
       message.error(
-        `已存在相同组合条件的规则「${getAuditFlowDisplayName(duplicate)}」，请勿重复配置`,
+        `已存在相同组合条件的规则「${getReservationLimitDisplayName(duplicate)}」，请勿重复配置`,
       );
       return;
     }
 
+    const limitsRaw = (values.limits ?? {}) as Record<string, number | null | undefined>;
+    const limits = Object.fromEntries(
+      Object.entries(limitsRaw).filter(([, v]) => v != null && v > 0),
+    );
+
     const name =
       (values.name as string)?.trim() ||
-      buildAuditFlowDefaultName(processType, conditions, isDefault);
+      buildReservationLimitDefaultName(conditions, isDefault);
 
-    const payload: AuditFlowConfig = {
-      id: editingId ?? `afc-${Date.now()}`,
+    const payload: ReservationLimitConfig = {
+      id: editingId ?? `rlc-${Date.now()}`,
       name,
-      processType,
       conditions,
-      matchType: values.matchType as AuditFlowConfig['matchType'],
+      matchType: values.matchType as ReservationLimitConfig['matchType'],
       isDefault,
-      approveMode: values.approveMode as AuditFlowConfig['approveMode'],
       enabled: values.enabled as boolean,
-      selfApplyAutoPass: values.selfApplyAutoPass as boolean,
-      stackable: values.stackable as boolean,
-      approverSteps,
+      limits,
+      violationAction,
+      approverSteps: violationAction === 'requireApproval' ? approverSteps : [],
     };
 
     if (formModal.mode === 'edit' && formModal.record) {
-      setAuditFlowConfigs(list.map((item) => (item.id === formModal.record!.id ? payload : item)));
+      setReservationLimitConfigs(list.map((item) => (item.id === formModal.record!.id ? payload : item)));
       message.success('修改成功');
     } else {
-      setAuditFlowConfigs([...list, payload]);
+      setReservationLimitConfigs([...list, payload]);
       message.success(formModal.mode === 'copy' ? '复制成功' : '保存成功');
     }
 
     setFormModal({ open: false, mode: 'add', record: null });
   };
 
-  const columns: ColumnsType<AuditFlowConfig> = [
+  const columns: ColumnsType<ReservationLimitConfig> = [
     {
       title: '#',
       width: 56,
@@ -223,26 +218,28 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
       dataIndex: 'name',
       width: 200,
       ellipsis: true,
-      render: (_, record) => getAuditFlowDisplayName(record),
-    },
-    {
-      title: '流程类型',
-      dataIndex: 'processType',
-      width: 120,
+      render: (_, record) => getReservationLimitDisplayName(record),
     },
     {
       title: '匹配条件',
       key: 'conditions',
-      width: 280,
+      width: 260,
       render: (_, record) =>
         formatConditionsSummary(record.conditions) ||
         (record.isDefault ? '（默认配置 = 是）' : '—'),
     },
     {
-      title: '审批模式',
-      dataIndex: 'approveMode',
-      width: 110,
-      render: (value: AuditFlowConfig['approveMode']) => renderApproveMode(value),
+      title: '占用管控参数',
+      key: 'limits',
+      width: 320,
+      ellipsis: true,
+      render: (_, record) => formatLimitsSummary(record.limits),
+    },
+    {
+      title: '超限处置',
+      dataIndex: 'violationAction',
+      width: 120,
+      render: (value: ReservationLimitConfig['violationAction']) => renderViolationAction(value),
     },
     {
       title: '启用',
@@ -285,20 +282,12 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
     <div className={`mid-platform-page${embedded ? ' mid-platform-page--embedded' : ''}`}>
       <div className="mid-platform-search-card">
         <Form form={form} layout="inline" className="mid-platform-search-form">
-          <Form.Item label="流程类型" name="processType">
+          <Form.Item label="超限处置" name="violationAction">
             <Select
               allowClear
-              placeholder="请选择 流程类型"
+              placeholder="请选择 超限处置"
               style={{ width: 180 }}
-              options={PROCESS_TYPE_OPTIONS}
-            />
-          </Form.Item>
-          <Form.Item label="审批类型" name="approveMode">
-            <Select
-              allowClear
-              placeholder="请选择 审批类型"
-              style={{ width: 180 }}
-              options={APPROVE_MODE_OPTIONS}
+              options={[...VIOLATION_ACTION_OPTIONS]}
             />
           </Form.Item>
           <Form.Item label="启用状态" name="enabled">
@@ -369,11 +358,11 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
           </Space>
         </div>
 
-        <Table<AuditFlowConfig>
+        <Table<ReservationLimitConfig>
           rowKey="id"
           columns={columns}
           dataSource={tableData}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1300 }}
           rowSelection={{
             selectedRowKeys,
             onChange: (keys) => setSelectedRowKeys(keys as string[]),
@@ -388,7 +377,7 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
         />
       </div>
 
-      <AuditFlowConfigFormModal
+      <ReservationLimitConfigFormModal
         open={formModal.open}
         mode={formModal.mode}
         record={formModal.record}
@@ -396,7 +385,7 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
         onSubmit={handleFormSubmit}
       />
 
-      <AuditFlowConfigViewModal
+      <ReservationLimitConfigViewModal
         open={Boolean(viewRecord)}
         record={viewRecord}
         onClose={() => setViewRecord(null)}

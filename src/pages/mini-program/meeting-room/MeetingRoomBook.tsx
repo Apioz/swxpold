@@ -12,7 +12,7 @@ import {
   formatRecurringConflictMessage,
   findRecurringConflictDates,
 } from '../../../data/recurringMeetingSchedule';
-import { submitRecurringMeeting, submitStandardMeeting } from '../../../data/meetingSubmissionStore';
+import { submitRecurringMeeting, submitStandardMeeting, ReservationLimitError } from '../../../data/meetingSubmissionStore';
 import type { MeetingTimeSlot } from '../../../data/meetingRoomSchedule';
 import {
   formatMeetingTimeRange,
@@ -245,23 +245,31 @@ export default function MeetingRoomBook() {
       );
 
       const doSubmitRecurring = () => {
-        submitRecurringMeeting({
-          roomId: room.id,
-          roomName: room.roomNo,
-          address: getMeetingRoomAddress(room),
-          title: subject.trim(),
-          description: description.trim(),
-          recurrenceStartDate,
-          recurrenceEndDate,
-          recurrenceWeekdays,
-          recurrenceWeekdaysLabel: weekdayLabel,
-          selectedSlots,
-        });
+        try {
+          submitRecurringMeeting({
+            roomId: room.id,
+            roomName: room.roomNo,
+            address: getMeetingRoomAddress(room),
+            title: subject.trim(),
+            description: description.trim(),
+            recurrenceStartDate,
+            recurrenceEndDate,
+            recurrenceWeekdays,
+            recurrenceWeekdaysLabel: weekdayLabel,
+            selectedSlots,
+          });
 
-        message.success(
-          `周期会议已提交审批，审批通过后将自动生成多场标准会议：每${weekdayLabel} ${formatSelectedSlots(selectedSlots)}（${recurrenceStartDate} 至 ${recurrenceEndDate}）`,
-        );
-        navigate('/mini-program/meeting-room/my-reservations?tab=processing');
+          message.success(
+            `周期会议已提交审批，审批通过后将自动生成多场标准会议：每${weekdayLabel} ${formatSelectedSlots(selectedSlots)}（${recurrenceStartDate} 至 ${recurrenceEndDate}）`,
+          );
+          navigate('/mini-program/meeting-room/my-reservations?tab=processing');
+        } catch (error) {
+          if (error instanceof ReservationLimitError) {
+            message.error(error.message);
+            return;
+          }
+          throw error;
+        }
       };
 
       if (conflictDates.length > 0) {
@@ -286,18 +294,26 @@ export default function MeetingRoomBook() {
       .filter(Boolean)
       .join(', ');
 
-    submitStandardMeeting({
-      roomId: room.id,
-      roomName: room.roomNo,
-      address: getMeetingRoomAddress(room),
-      title: subject.trim(),
-      description: description.trim(),
-      selectedSlots,
-      activeDate: slotActiveDate ?? '',
-      duration: formatSelectedSlots(selectedSlots),
-      participants: participantNames,
-      participantCount: selectedParticipantIds.length,
-    });
+    try {
+      submitStandardMeeting({
+        roomId: room.id,
+        roomName: room.roomNo,
+        address: getMeetingRoomAddress(room),
+        title: subject.trim(),
+        description: description.trim(),
+        selectedSlots,
+        activeDate: slotActiveDate ?? '',
+        duration: formatSelectedSlots(selectedSlots),
+        participants: participantNames,
+        participantCount: selectedParticipantIds.length,
+      });
+    } catch (error) {
+      if (error instanceof ReservationLimitError) {
+        message.error(error.message);
+        return;
+      }
+      throw error;
+    }
 
     message.success(`已提交标准会议预约：${formatSelectedSlots(selectedSlots)}`);
     navigate('/mini-program/meeting-room/my-reservations?tab=processing');
