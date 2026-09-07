@@ -152,9 +152,9 @@ export default function ReservationLimitConfigList({ embedded }: ReservationLimi
     const editingId = formModal.mode === 'edit' ? formModal.record?.id : undefined;
     const violationAction = values.violationAction as ReservationLimitConfig['violationAction'];
 
-    const approverSteps = normalizeFormApproverSteps(values.approverSteps, 'manual');
+    const approverSteps = normalizeFormApproverSteps(values.approverSteps);
     if (violationAction === 'requireApproval') {
-      const approverValidationError = validateApproverSteps(approverSteps, 'manual');
+      const approverValidationError = validateApproverSteps(approverSteps);
       if (approverValidationError) {
         message.error(approverValidationError);
         return;

@@ -26,8 +26,7 @@ export const MATCH_TYPE_OPTIONS = [
 ];
 
 export const APPROVE_MODE_OPTIONS = [
-  { label: '人工审批（指定人员审批）', value: 'manual' },
-  { label: '自动审批（当前组织管理员自动通过）', value: 'auto' },
+  { label: '指定人员审批', value: 'manual' },
 ];
 
 export { DYNAMIC_SCOPE_OPTIONS } from './auditFlowOptions';
@@ -106,15 +105,13 @@ export const auditFlowConfigs: AuditFlowConfig[] = [
     approveMode: 'manual',
     enabled: true,
     selfApplyAutoPass: true,
-    stackable: false,
     approverSteps: [
       {
         orgLevel: '公司',
         orgName: 'A公司',
         signType: '或签',
-        approverType: '动态人员',
-        dynamicScope: 'orgAdmin',
-        approverNames: [],
+        approverType: '指定人员',
+        approverNames: ['王磊', '陈昊'],
       },
     ],
   },
@@ -127,8 +124,6 @@ export const auditFlowConfigs: AuditFlowConfig[] = [
     isDefault: false,
     approveMode: 'manual',
     enabled: true,
-    stackable: true,
-    selfApplyAutoPass: false,
     approverSteps: [
       {
         orgLevel: '集团',
@@ -140,18 +135,18 @@ export const auditFlowConfigs: AuditFlowConfig[] = [
     ],
   },
   {
-    id: 'afc-1103-auto',
-    name: '1103会议室 · 管理员自动审批',
+    id: 'afc-1103-manual',
+    name: '1103会议室 · 会议室管理员审批',
     processType: '会议室预约',
     conditions: [{ type: 'room', values: ['mr-1103'] }],
     matchType: '精确匹配',
     isDefault: false,
-    approveMode: 'auto',
+    approveMode: 'manual',
     enabled: true,
     approverSteps: [
       {
-        orgLevel: '公司',
-        orgName: '按申请人所属公司',
+        orgLevel: '集团',
+        orgName: '生物芯片上海国家工程研究中心',
         signType: '或签',
         approverType: '动态人员',
         dynamicScope: 'orgAdmin',

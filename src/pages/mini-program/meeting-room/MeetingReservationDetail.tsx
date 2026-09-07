@@ -127,7 +127,7 @@ export default function MeetingReservationDetail() {
                 {reservation.approvedByNames.join('、')}
                 {reservation.autoApproverScopeLabel
                   ? `（${reservation.autoApproverScopeLabel}自动通过）`
-                  : '（当前组织管理员自动通过）'}
+                  : '（会议室管理员自动通过）'}
               </span>
             </div>
           )}

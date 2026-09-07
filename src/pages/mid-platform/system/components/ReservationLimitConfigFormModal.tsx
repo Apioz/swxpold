@@ -4,7 +4,7 @@ import {
   MinusOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Input, InputNumber, Modal, Radio, Select, Switch, message } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Radio, Select, Switch, Tag, message } from 'antd';
 import { useEffect, useMemo } from 'react';
 import type {
   AuditFlowApproverStep,
@@ -26,10 +26,11 @@ import { useMeetingRoomStore } from '../../../../store/meetingRoomStore';
 import {
   MAX_APPROVER_STEPS,
   createDefaultApproverStep,
+  createDynamicApproverStep,
 } from '../../../../utils/auditFlowApproverSteps';
 import { buildReservationLimitDefaultName } from '../../../../utils/reservationLimitMatcher';
 import AuditFlowConditionsEditor from './AuditFlowConditionsEditor';
-import { ORG_ADMIN_SCOPE_LABEL } from '../../../../data/auditFlowOptions';
+import { MEETING_ROOM_ADMIN_SCOPE_LABEL } from '../../../../data/auditFlowOptions';
 import '../AuditFlowConfig.css';
 
 interface ReservationLimitConfigFormModalProps {
@@ -65,7 +66,6 @@ export default function ReservationLimitConfigFormModal({
   const ruleName = Form.useWatch('name', form) as string | undefined;
 
   const stepCount = approverSteps?.length ?? 0;
-  const hasDynamicStep = approverSteps?.some((s) => s?.approverType === '动态人员') ?? false;
   const modalTitle = mode === 'add' ? '新增占用限制' : mode === 'copy' ? '复制占用限制' : '编辑占用限制';
   const roomOptions = useMemo(() => getRoomOptions(), [meetingRooms]);
   const requireApproval = violationAction === 'requireApproval';
@@ -283,8 +283,18 @@ export default function ReservationLimitConfigFormModal({
                             <Select
                               options={[
                                 { label: '指定人员', value: '指定人员' },
-                                { label: '动态人员', value: '动态人员', disabled: hasDynamicStep && approverSteps?.[index]?.approverType !== '动态人员' },
+                                { label: '动态人员', value: '动态人员' },
                               ]}
+                              onChange={(value) => {
+                                if (value === '动态人员') {
+                                  form.setFieldValue(
+                                    ['approverSteps', name, 'dynamicScope'],
+                                    form.getFieldValue(['approverSteps', name, 'dynamicScope']) ??
+                                      'orgAdmin',
+                                  );
+                                  form.setFieldValue(['approverSteps', name, 'approverNames'], []);
+                                }
+                              }}
                             />
                           </Form.Item>
                         </div>
@@ -304,13 +314,20 @@ export default function ReservationLimitConfigFormModal({
                             if (approverType === '动态人员') {
                               return (
                                 <div className="audit-flow-auto-approver-panel audit-flow-approver-step-dynamic">
-                                  <div className="audit-flow-auto-approver-row">
-                                    <span className="audit-flow-auto-approver-label">审批角色</span>
-                                    <span>{ORG_ADMIN_SCOPE_LABEL}</span>
-                                  </div>
+                                  <Form.Item label="动态审批角色">
+                                    <Tag color="processing">{MEETING_ROOM_ADMIN_SCOPE_LABEL}</Tag>
+                                  </Form.Item>
                                   <div className="audit-flow-auto-hint">
-                                    按匹配条件中的组织层级解析当前组织管理员
+                                    按匹配条件中的组织层级解析会议室管理员
                                   </div>
+                                  <Form.Item
+                                    {...restField}
+                                    name={[name, 'dynamicScope']}
+                                    hidden
+                                    initialValue="orgAdmin"
+                                  >
+                                    <Input type="hidden" />
+                                  </Form.Item>
                                 </div>
                               );
                             }
@@ -348,26 +365,14 @@ export default function ReservationLimitConfigFormModal({
                       </Button>
                       <Button
                         onClick={() => {
-                          if (hasDynamicStep) {
-                            message.warning('同一规则只能配置一组「当前组织管理员」');
-                            return;
-                          }
                           if (stepCount >= MAX_APPROVER_STEPS) {
                             message.warning(`最多配置 ${MAX_APPROVER_STEPS} 组审批节点`);
                             return;
                           }
-                          add({
-                            orgLevel: '公司',
-                            orgName: '按匹配条件组织层级',
-                            signType: '或签',
-                            approverType: '动态人员',
-                            dynamicScope: 'orgAdmin',
-                            approverNames: [],
-                          });
+                          add(createDynamicApproverStep());
                         }}
-                        disabled={hasDynamicStep}
                       >
-                        添加{ORG_ADMIN_SCOPE_LABEL}
+                        添加{MEETING_ROOM_ADMIN_SCOPE_LABEL}
                       </Button>
                     </div>
                   </>

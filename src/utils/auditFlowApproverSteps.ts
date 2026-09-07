@@ -1,7 +1,5 @@
-import type {
-  AuditFlowApproverStep,
-  AuditFlowApproveMode,
-} from '../types/auditFlowConfig';
+import type { AuditFlowApproverStep } from '../types/auditFlowConfig';
+import { normalizeDynamicScope } from '../data/auditFlowOptions';
 
 export const MAX_APPROVER_STEPS = 5;
 
@@ -17,13 +15,15 @@ export function createDefaultApproverStep(): AuditFlowApproverStep {
   return { ...DEFAULT_APPROVER_STEP, approverNames: [] };
 }
 
-export function createAutoApproverStep(): AuditFlowApproverStep {
+export function createDynamicApproverStep(
+  dynamicScope: AuditFlowApproverStep['dynamicScope'] = 'orgAdmin',
+): AuditFlowApproverStep {
   return {
     orgLevel: '公司',
     orgName: '按匹配条件组织层级',
     signType: '或签',
     approverType: '动态人员',
-    dynamicScope: 'orgAdmin',
+    dynamicScope: normalizeDynamicScope(dynamicScope),
     approverNames: [],
   };
 }
@@ -39,13 +39,20 @@ function stepSignature(step: AuditFlowApproverStep): string {
   });
 }
 
-/** 校验审核人步骤配置，返回错误文案；通过则返回 null */
-export function validateApproverSteps(
-  steps: AuditFlowApproverStep[] | undefined,
-  approveMode: AuditFlowApproveMode,
-): string | null {
-  if (approveMode === 'auto') return null;
+function normalizeStep(step: AuditFlowApproverStep): AuditFlowApproverStep {
+  const approverType = step.approverType ?? '指定人员';
+  return {
+    orgLevel: step.orgLevel ?? '集团',
+    orgName: step.orgName ?? '',
+    signType: step.signType ?? '或签',
+    approverType,
+    approverNames: approverType === '指定人员' ? (step.approverNames ?? []).filter(Boolean) : [],
+    dynamicScope: approverType === '动态人员' ? normalizeDynamicScope(step.dynamicScope) : undefined,
+  };
+}
 
+/** 校验审核人步骤配置，返回错误文案；通过则返回 null */
+export function validateApproverSteps(steps: AuditFlowApproverStep[] | undefined): string | null {
   if (!steps || steps.length === 0) {
     return '请至少配置一组审核人';
   }
@@ -54,9 +61,11 @@ export function validateApproverSteps(
     return `同一规则最多配置 ${MAX_APPROVER_STEPS} 组审核人`;
   }
 
-  const dynamicCount = steps.filter((s) => s.approverType === '动态人员').length;
-  if (dynamicCount > 1) {
-    return '同一规则只能配置一组「当前组织管理员」，请勿重复添加';
+  const dynamicScopes = steps
+    .filter((s) => s.approverType === '动态人员')
+    .map((s) => normalizeDynamicScope(s.dynamicScope));
+  if (dynamicScopes.length !== new Set(dynamicScopes).size) {
+    return '同一规则中存在重复的动态审批角色，请合并或删除重复组';
   }
 
   for (let i = 0; i < steps.length; i += 1) {
@@ -77,28 +86,17 @@ export function validateApproverSteps(
   return null;
 }
 
-export function normalizeFormApproverSteps(
-  raw: unknown,
-  approveMode: AuditFlowApproveMode,
-): AuditFlowApproverStep[] {
-  if (approveMode === 'auto') {
-    return [createAutoApproverStep()];
-  }
-
+export function normalizeFormApproverSteps(raw: unknown): AuditFlowApproverStep[] {
   if (!Array.isArray(raw) || raw.length === 0) {
     return [createDefaultApproverStep()];
   }
 
-  return raw.map((item) => {
-    const step = item as AuditFlowApproverStep;
-    const approverType = step.approverType ?? '指定人员';
-    return {
-      orgLevel: step.orgLevel ?? '集团',
-      orgName: step.orgName ?? '',
-      signType: step.signType ?? '或签',
-      approverType,
-      approverNames: approverType === '指定人员' ? (step.approverNames ?? []).filter(Boolean) : [],
-      dynamicScope: approverType === '动态人员' ? 'orgAdmin' : undefined,
-    };
-  });
+  return raw.map((item) => normalizeStep(item as AuditFlowApproverStep));
+}
+
+export function normalizeStoredApproverSteps(steps: AuditFlowApproverStep[] | undefined): AuditFlowApproverStep[] {
+  if (!Array.isArray(steps) || steps.length === 0) {
+    return [createDefaultApproverStep()];
+  }
+  return steps.map(normalizeStep);
 }

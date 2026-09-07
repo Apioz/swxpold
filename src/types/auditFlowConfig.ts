@@ -16,7 +16,7 @@ export type AuditFlowSignType = '会签' | '或签';
 
 export type AuditFlowApproverType = '指定人员' | '动态人员';
 
-/** 动态审核人：当前组织管理员（具体层级由匹配条件推断） */
+/** 动态审核人：会议室管理员（层级由匹配条件推断） */
 export type AuditFlowDynamicScope = 'orgAdmin';
 
 /** 内部解析层级，不暴露给配置 UI */
@@ -49,18 +49,14 @@ export interface AuditFlowConfig {
   conditions: AuditFlowCondition[];
   matchType: AuditFlowMatchType;
   isDefault: boolean;
-  /** 人工审批 / 自动审批（当前组织管理员角色自动通过） */
+  /** 指定人员审批（已移除自动审批模式，仍支持动态人员） */
   approveMode: AuditFlowApproveMode;
   /** 是否启用 */
   enabled: boolean;
   /**
-   * 申请人为所属公司管理员时，跳过本规则审批（常用于公司+会议室组合规则）
+   * 会议室管理员本人提交预约时，系统自动审批通过（仍需正常提交申请）
    */
   selfApplyAutoPass?: boolean;
-  /**
-   * 可与其它命中规则叠加审批（如会议室固定审批人，不管申请人是谁都需审批）
-   */
-  stackable?: boolean;
   approverSteps: AuditFlowApproverStep[];
 }
 

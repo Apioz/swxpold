@@ -216,7 +216,7 @@ function resolveSubmissionAuditOutcome(
   );
 
   if (plan.approveMode === 'auto' && !limitMeta?.limitViolationApproverNames?.length) {
-    const scopeLabel = plan.approverScopeLabel ?? '组织管理员';
+    const scopeLabel = plan.approverScopeLabel ?? '会议室管理员';
     return {
       reservationStatus: 'completed',
       reservationStatusLabel: `${scopeLabel}已自动通过`,

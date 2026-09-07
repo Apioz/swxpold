@@ -1,12 +1,12 @@
-import { Button, Modal, Tag } from 'antd';
+import { Button, Modal, Radio, Tag } from 'antd';
 import type { ReservationLimitConfig } from '../../../../types/reservationLimitConfig';
 import { VIOLATION_ACTION_OPTIONS, LIMIT_FIELD_META } from '../../../../data/mockReservationLimitConfig';
+import { getDynamicScopeLabel } from '../../../../data/auditFlowOptions';
 import {
   formatLimitsSummary,
   getReservationLimitDisplayName,
 } from '../../../../utils/reservationLimitMatcher';
 import { formatConditionsSummary } from '../../../../utils/auditFlowMatcher';
-import { ORG_ADMIN_SCOPE_LABEL } from '../../../../data/auditFlowOptions';
 import '../AuditFlowConfig.css';
 
 interface ReservationLimitConfigViewModalProps {
@@ -138,8 +138,14 @@ export default function ReservationLimitConfigViewModal({
                   <div className="audit-flow-approver-view-cell">{step.signType}</div>
                   <div className="audit-flow-approver-view-cell audit-flow-approver-view-names">
                     <div className="audit-flow-approver-view-names-head">审批人</div>
+                    <Radio.Group value={step.approverType ?? '指定人员'} disabled>
+                      <Radio value="指定人员">指定人员</Radio>
+                      <Radio value="动态人员">动态人员</Radio>
+                    </Radio.Group>
                     {step.approverType === '动态人员' ? (
-                      <Tag>{ORG_ADMIN_SCOPE_LABEL}</Tag>
+                      <div className="audit-flow-approver-tags">
+                        <Tag color="processing">{getDynamicScopeLabel(step.dynamicScope)}</Tag>
+                      </div>
                     ) : (
                       <div className="audit-flow-approver-tags">
                         {step.approverNames.map((name) => (

@@ -12,6 +12,7 @@ import {
 import { Avatar, Dropdown, Layout, Menu, Tabs } from 'antd';
 import type { MenuProps } from 'antd';
 import {
+  getMidPlatformOpenKeys,
   getMidPlatformSelectedKey,
   midPlatformMenuItems,
   midPlatformRouteTitleMap,
@@ -65,6 +66,13 @@ export default function MidPlatformLayout() {
     () => [getMidPlatformSelectedKey(location.pathname)],
     [location.pathname],
   );
+
+  useEffect(() => {
+    setOpenKeys((prev) => {
+      const next = getMidPlatformOpenKeys(location.pathname);
+      return [...new Set([...prev, ...next])];
+    });
+  }, [location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;

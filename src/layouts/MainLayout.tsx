@@ -60,8 +60,7 @@ const routeTitleMap: Record<string, string> = {
   '/customer': '客户管理',
   '/project': '项目管理',
   '/system/params': '参数管理',
-  '/system/audit-flow': '审核流程配置',
-  '/system/reservation-limits': '预约占用限制配置',
+  '/system/audit-flow': '流程配置',
   '/task': '任务管理',
 };
 
@@ -152,8 +151,7 @@ const menuItems: MenuItem[] = [
           </span>
         ),
       },
-      { key: '/system/audit-flow', label: '审核流程配置' },
-      { key: '/system/reservation-limits', label: '预约占用限制配置' },
+      { key: '/system/audit-flow', label: '流程配置' },
     ],
   },
   { key: '/task', icon: <UnorderedListOutlined />, label: '任务管理' },

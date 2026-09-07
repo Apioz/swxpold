@@ -34,6 +34,16 @@
   grid-column: 1 / -1;
 }
 
+.audit-flow-strategy-block {
+  margin-top: 16px;
+  padding-top: 4px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+.audit-flow-strategy-block .audit-flow-form-section-title {
+  margin-bottom: 12px;
+}
+
 .audit-flow-form .ant-form-item {
   margin-bottom: 16px;
 }

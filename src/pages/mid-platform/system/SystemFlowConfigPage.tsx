@@ -1,5 +1,5 @@
 import { Tabs } from 'antd';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuditFlowConfigList from './AuditFlowConfigList';
 import ReservationLimitConfigList from './ReservationLimitConfigList';
 import './AuditFlowConfig.css';
@@ -11,27 +11,22 @@ const TAB_ITEMS = [
 
 type FlowConfigTabKey = (typeof TAB_ITEMS)[number]['key'];
 
-function resolveFlowConfigBasePath(pathname: string): '/system' | '/mid-platform/system' {
-  return pathname.startsWith('/mid-platform') ? '/mid-platform/system' : '/system';
-}
-
-function resolveActiveTab(pathname: string): FlowConfigTabKey {
-  if (pathname.includes('reservation-limits')) return 'reservation-limit';
-  return 'audit-flow';
-}
-
-function tabToPath(base: '/system' | '/mid-platform/system', tab: FlowConfigTabKey): string {
-  return tab === 'reservation-limit' ? `${base}/reservation-limits` : `${base}/audit-flow`;
+function resolveActiveTab(tab: string | null): FlowConfigTabKey {
+  return tab === 'reservation-limit' ? 'reservation-limit' : 'audit-flow';
 }
 
 export default function SystemFlowConfigPage() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const basePath = resolveFlowConfigBasePath(location.pathname);
-  const activeTab = resolveActiveTab(location.pathname);
+  const [searchParams] = useSearchParams();
+  const activeTab = resolveActiveTab(searchParams.get('tab'));
 
   const handleTabChange = (key: string) => {
-    navigate(tabToPath(basePath, key as FlowConfigTabKey));
+    const tab = key as FlowConfigTabKey;
+    if (tab === 'reservation-limit') {
+      navigate('/system/audit-flow?tab=reservation-limit');
+      return;
+    }
+    navigate('/system/audit-flow');
   };
 
   return (

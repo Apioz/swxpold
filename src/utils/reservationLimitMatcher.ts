@@ -345,7 +345,7 @@ function resolveLimitApprovers(
     if (step.approverType === '指定人员') {
       names.push(...(step.approverNames ?? []).filter(Boolean));
     } else {
-      names.push(...resolveOrgAdmins('orgAdmin', context, orgScopes));
+      names.push(...resolveOrgAdmins(step.dynamicScope ?? 'orgAdmin', context, orgScopes));
     }
   }
   return [...new Set(names.map((n) => n.trim()).filter(Boolean))];

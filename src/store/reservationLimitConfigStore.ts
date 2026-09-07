@@ -3,6 +3,7 @@ import type { AuditFlowCondition, LegacyAuditFlowCondition } from '../types/audi
 import type { ReservationLimitConfig, ReservationLimitParams } from '../types/reservationLimitConfig';
 import { reservationLimitConfigs } from '../data/mockReservationLimitConfig';
 import { normalizeAuditFlowCondition } from '../utils/auditFlowMatcher';
+import { normalizeStoredApproverSteps } from '../utils/auditFlowApproverSteps';
 import { loadPersisted, savePersisted } from '../utils/persistStore';
 
 const STORAGE_KEY = 'sw.reservation-limit-configs-v1';
@@ -34,7 +35,10 @@ function normalizeReservationLimitConfig(raw: ReservationLimitConfig): Reservati
     conditions: normalizeConditions(raw.conditions as LegacyCondition[]),
     limits: normalizeLimits(raw.limits),
     violationAction: raw.violationAction ?? 'reject',
-    approverSteps: Array.isArray(raw.approverSteps) ? raw.approverSteps : [],
+    approverSteps:
+      raw.violationAction === 'requireApproval'
+        ? normalizeStoredApproverSteps(raw.approverSteps)
+        : [],
   };
 }
 

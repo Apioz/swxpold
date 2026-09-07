@@ -229,7 +229,10 @@ function App() {
               element={<PlaceholderPage title="参数管理" />}
             />
             <Route path="system/audit-flow" element={<SystemFlowConfigPage />} />
-            <Route path="system/reservation-limits" element={<SystemFlowConfigPage />} />
+            <Route
+              path="system/reservation-limits"
+              element={<Navigate to="/system/audit-flow?tab=reservation-limit" replace />}
+            />
             <Route
               path="task"
               element={<PlaceholderPage title="任务管理" />}
@@ -270,8 +273,6 @@ function App() {
               path="appointment/meeting-rooms/records"
               element={<PlaceholderPage title="会议记录" />}
             />
-            <Route path="system/audit-flow" element={<SystemFlowConfigPage />} />
-            <Route path="system/reservation-limits" element={<SystemFlowConfigPage />} />
           </Route>
           <Route path="/foundation" element={<FoundationLayout />}>
             <Route index element={<Navigate to="/foundation/space-center" replace />} />

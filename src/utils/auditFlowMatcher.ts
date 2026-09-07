@@ -11,7 +11,7 @@ import type {
 import {
   GLOBAL_FALLBACK_APPROVERS,
   isApplicantOrgAdmin,
-  ORG_ADMIN_SCOPE_LABEL,
+  MEETING_ROOM_ADMIN_SCOPE_LABEL,
   ORG_SCOPE_OPTIONS,
   resolveOrgAdminLevelFromOrgScopes,
   resolveOrgAdmins,
@@ -304,9 +304,13 @@ function resolveSingleStepApprovers(
   context: AuditFlowMatchContext,
 ): string[] {
   if (step.approverType === '指定人员') {
-    return step.approverNames.filter(Boolean);
+    return (step.approverNames ?? []).filter(Boolean);
   }
-  return resolveOrgAdmins('orgAdmin', context, getFlowOrgScopes(flow));
+  return resolveOrgAdmins(
+    step.dynamicScope ?? 'orgAdmin',
+    context,
+    getFlowOrgScopes(flow),
+  );
 }
 
 function resolveStepApproversRaw(
@@ -401,8 +405,8 @@ function buildFallbackManualPlan(
 }
 
 
-/** 自动审批时的审批人：当前组织管理员（层级由规则条件推断） */
-export function resolveAutoApproverNames(
+/** 会议室管理员申请自动通过时的审批人记录 */
+export function resolveSelfPassApproverNames(
   context: AuditFlowMatchContext,
   flow: AuditFlowConfig,
   selfPass = false,
@@ -422,7 +426,7 @@ function buildOrgAdminAutoPlan(
   sourceFlow: AuditFlowConfig,
   selfPass = false,
 ): AuditResolutionPlan {
-  const approverNames = resolveAutoApproverNames(context, sourceFlow, selfPass);
+  const approverNames = resolveSelfPassApproverNames(context, sourceFlow, selfPass);
   const stepFlow = matchedFlows[0];
   return {
     matchedFlows,
@@ -432,7 +436,7 @@ function buildOrgAdminAutoPlan(
     displayName,
     approveMode: 'auto',
     approverNames,
-    approverScopeLabel: ORG_ADMIN_SCOPE_LABEL,
+    approverScopeLabel: MEETING_ROOM_ADMIN_SCOPE_LABEL,
   };
 }
 
@@ -450,14 +454,6 @@ export function resolveAuditApprovalPlan(
     if (!fallback) {
       return buildFallbackManualPlan(undefined, context, '');
     }
-    if (fallback.approveMode === 'auto') {
-      return buildOrgAdminAutoPlan(
-        [fallback],
-        context,
-        getAuditFlowDisplayName(fallback),
-        fallback,
-      );
-    }
     const approverNames = ensureApprovers(
       resolveStepApproversRaw(fallback, context),
       context,
@@ -470,21 +466,16 @@ export function resolveAuditApprovalPlan(
     );
   }
 
-  const stackableRules = matched.filter((f) => f.stackable || isRoomOnlyRule(f));
-  const primaryRules = matched.filter((f) => !f.stackable && !isRoomOnlyRule(f));
+  const roomOnlyRules = matched.filter((f) => isRoomOnlyRule(f));
+  const primaryRules = matched.filter((f) => !isRoomOnlyRule(f));
   const primary = primaryRules[0] ?? matched[0];
 
   const steps: AuditApprovalStep[] = [];
   const usedFlowIds = new Set<string>();
 
-  const addStep = (flow: AuditFlowConfig, skipped: boolean, selfPass = false) => {
+  const addStep = (flow: AuditFlowConfig, skipped: boolean) => {
     if (usedFlowIds.has(flow.id)) return;
     usedFlowIds.add(flow.id);
-    if (flow.approveMode === 'auto') {
-      const approverNames = resolveAutoApproverNames(context, flow, selfPass);
-      steps.push({ flow, approverNames, skipped: false, autoApproved: true });
-      return;
-    }
     if (skipped) {
       steps.push({ flow, approverNames: [], skipped: true });
       return;
@@ -511,17 +502,13 @@ export function resolveAuditApprovalPlan(
         hasOrgAndRoomRule(primary),
     );
 
-    if (primary.approveMode === 'auto') {
-      addStep(primary, false);
-    } else {
-      addStep(primary, primarySkippedForAdmin, primarySkippedForAdmin);
-    }
+    addStep(primary, primarySkippedForAdmin);
   }
 
-  stackableRules.forEach((rule) => {
+  roomOnlyRules.forEach((rule) => {
     if (rule.id === primary?.id) return;
 
-    // 组织+会议室专属规则且管理员自审已通过时，不再叠加同会议室的固定审批人规则
+    // 组织+会议室专属规则且管理员申请已自动通过时，不再叠加同会议室的固定审批人规则
     if (primarySkippedForAdmin && primary && isRoomOnlyRule(rule)) {
       const primaryRooms = extractRoomIdsFromConditions(primary.conditions);
       const stackRooms = extractRoomIdsFromConditions(rule.conditions);
@@ -530,11 +517,7 @@ export function resolveAuditApprovalPlan(
       if (sameExclusiveRoom) return;
     }
 
-    if (rule.approveMode === 'auto') {
-      addStep(rule, false);
-    } else {
-      addStep(rule, false);
-    }
+    addStep(rule, false);
   });
 
   const manualSteps = steps.filter((s) => !s.autoApproved && !s.skipped);

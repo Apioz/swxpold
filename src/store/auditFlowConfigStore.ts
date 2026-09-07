@@ -1,12 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import type { AuditFlowCondition, AuditFlowConfig } from '../types/auditFlowConfig';
-import {
-  normalizeDynamicScope,
-} from '../data/auditFlowOptions';
 import { auditFlowConfigs } from '../data/mockAuditFlowConfig';
-import {
-  createDefaultApproverStep,
-} from '../utils/auditFlowApproverSteps';
+import { normalizeStoredApproverSteps } from '../utils/auditFlowApproverSteps';
 import {
   buildAuditFlowDefaultName,
   normalizeAuditFlowCondition,
@@ -48,17 +43,10 @@ function normalizeAuditFlowConfig(raw: LegacyAuditFlowConfig): AuditFlowConfig {
     conditions,
     matchType: raw.matchType ?? '精确匹配',
     isDefault,
-    approveMode: raw.approveMode ?? 'manual',
+    approveMode: 'manual',
     enabled: raw.enabled !== false,
     selfApplyAutoPass: raw.selfApplyAutoPass ?? false,
-    stackable: raw.stackable ?? false,
-    approverSteps:
-      (raw.approverSteps ?? []).length > 0
-        ? (raw.approverSteps ?? []).map((step) => ({
-            ...step,
-            dynamicScope: normalizeDynamicScope(step.dynamicScope),
-          }))
-        : [createDefaultApproverStep()],
+    approverSteps: normalizeStoredApproverSteps(raw.approverSteps),
   };
 }
 

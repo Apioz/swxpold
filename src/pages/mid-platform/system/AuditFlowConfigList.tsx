@@ -12,11 +12,10 @@ import {
   SearchOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Modal, Radio, Select, Space, Switch, Table, Tag, message } from 'antd';
+import { Button, Form, Modal, Radio, Select, Space, Switch, Table, message } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import type { AuditFlowCondition, AuditFlowConfig } from '../../../types/auditFlowConfig';
 import {
-  APPROVE_MODE_OPTIONS,
   PROCESS_TYPE_OPTIONS,
 } from '../../../data/mockAuditFlowConfig';
 import {
@@ -29,6 +28,7 @@ import {
   formatConditionsSummary,
   getAuditFlowDisplayName,
   getAuditFlowMatchWeight,
+  getAuditRuleShape,
   normalizeAuditFlowCondition,
 } from '../../../utils/auditFlowMatcher';
 import {
@@ -42,18 +42,12 @@ import './AuditFlowConfig.css';
 
 interface SearchForm {
   processType?: string;
-  approveMode?: string;
   isDefault?: boolean;
   enabled?: boolean;
 }
 
 interface AuditFlowConfigListProps {
   embedded?: boolean;
-}
-
-function renderApproveMode(mode: AuditFlowConfig['approveMode']) {
-  const label = APPROVE_MODE_OPTIONS.find((item) => item.value === mode)?.label ?? mode;
-  return mode === 'auto' ? <Tag color="green">{label.split('（')[0]}</Tag> : label.split('（')[0];
 }
 
 function normalizeFormConditions(raw: unknown): AuditFlowCondition[] {
@@ -88,9 +82,6 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
 
     if (search.processType) {
       data = data.filter((item) => item.processType === search.processType);
-    }
-    if (search.approveMode) {
-      data = data.filter((item) => item.approveMode === search.approveMode);
     }
     if (search.isDefault === true) {
       data = data.filter((item) => item.isDefault);
@@ -153,16 +144,13 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
     const processType = values.processType as AuditFlowConfig['processType'];
     const editingId = formModal.mode === 'edit' ? formModal.record?.id : undefined;
 
-    if (values.selfApplyAutoPass && values.stackable) {
-      message.error(
-        '「管理员自审自动通过」与「叠加审批」不能同时开启，请拆分为两条规则分别配置',
-      );
+    if (values.selfApplyAutoPass && getAuditRuleShape(conditions) !== 'orgRoom') {
+      message.error('「会议室管理员申请自动通过」仅适用于「组织+会议室」组合条件');
       return;
     }
 
-    const approveMode = values.approveMode as AuditFlowConfig['approveMode'];
-    const approverSteps = normalizeFormApproverSteps(values.approverSteps, approveMode);
-    const approverValidationError = validateApproverSteps(approverSteps, approveMode);
+    const approverSteps = normalizeFormApproverSteps(values.approverSteps);
+    const approverValidationError = validateApproverSteps(approverSteps);
     if (approverValidationError) {
       message.error(approverValidationError);
       return;
@@ -192,10 +180,9 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
       conditions,
       matchType: values.matchType as AuditFlowConfig['matchType'],
       isDefault,
-      approveMode: values.approveMode as AuditFlowConfig['approveMode'],
+      approveMode: 'manual',
       enabled: values.enabled as boolean,
       selfApplyAutoPass: values.selfApplyAutoPass as boolean,
-      stackable: values.stackable as boolean,
       approverSteps,
     };
 
@@ -233,16 +220,17 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
     {
       title: '匹配条件',
       key: 'conditions',
-      width: 280,
+      width: 240,
       render: (_, record) =>
         formatConditionsSummary(record.conditions) ||
         (record.isDefault ? '（默认配置 = 是）' : '—'),
     },
     {
-      title: '审批模式',
-      dataIndex: 'approveMode',
-      width: 110,
-      render: (value: AuditFlowConfig['approveMode']) => renderApproveMode(value),
+      title: '申请自动通过',
+      dataIndex: 'selfApplyAutoPass',
+      width: 100,
+      align: 'center',
+      render: (value: boolean | undefined) => (value ? '是' : '否'),
     },
     {
       title: '启用',
@@ -291,14 +279,6 @@ export default function AuditFlowConfigList({ embedded }: AuditFlowConfigListPro
               placeholder="请选择 流程类型"
               style={{ width: 180 }}
               options={PROCESS_TYPE_OPTIONS}
-            />
-          </Form.Item>
-          <Form.Item label="审批类型" name="approveMode">
-            <Select
-              allowClear
-              placeholder="请选择 审批类型"
-              style={{ width: 180 }}
-              options={APPROVE_MODE_OPTIONS}
             />
           </Form.Item>
           <Form.Item label="启用状态" name="enabled">

@@ -37,11 +37,22 @@ export const PERSON_OPTIONS: OptionItem[] = mockPersonnel
     value: p.id,
   }));
 
-export const DYNAMIC_SCOPE_OPTIONS: { label: string; value: AuditFlowDynamicScope }[] = [
-  { label: '当前组织管理员', value: 'orgAdmin' },
+export const DYNAMIC_SCOPE_OPTIONS: {
+  label: string;
+  value: AuditFlowDynamicScope;
+  hint: string;
+}[] = [
+  {
+    label: '会议室管理员',
+    value: 'orgAdmin',
+    hint: '按上方匹配条件中的组织层级（公司 / 园区 / 部门）解析对应管理员。',
+  },
 ];
 
-export const ORG_ADMIN_SCOPE_LABEL = '当前组织管理员';
+/** @deprecated 使用 MEETING_ROOM_ADMIN_SCOPE_LABEL */
+export const ORG_ADMIN_SCOPE_LABEL = '会议室管理员';
+
+export const MEETING_ROOM_ADMIN_SCOPE_LABEL = '会议室管理员';
 
 /** 各公司管理员（演示用） */
 export const COMPANY_ADMIN_MAP: Record<string, string[]> = {
@@ -89,14 +100,20 @@ export function getDepartmentAdmins(department: string): string[] {
   return DEPARTMENT_ADMIN_MAP[department] ?? [...GLOBAL_FALLBACK_APPROVERS];
 }
 
-export function getDynamicScopeLabel(_scope?: AuditFlowDynamicScope): string {
-  return ORG_ADMIN_SCOPE_LABEL;
+export function getDynamicScopeLabel(scope?: AuditFlowDynamicScope): string {
+  return DYNAMIC_SCOPE_OPTIONS.find((item) => item.value === scope)?.label ?? ORG_ADMIN_SCOPE_LABEL;
+}
+
+export function getDynamicScopeHint(scope?: AuditFlowDynamicScope): string {
+  return (
+    DYNAMIC_SCOPE_OPTIONS.find((item) => item.value === scope)?.hint ??
+    DYNAMIC_SCOPE_OPTIONS[0].hint
+  );
 }
 
 export function normalizeDynamicScope(
-  scope?: AuditFlowDynamicScope | OrgAdminResolveLevel | string,
-): AuditFlowDynamicScope | undefined {
-  if (!scope) return undefined;
+  _scope?: AuditFlowDynamicScope | OrgAdminResolveLevel | string,
+): AuditFlowDynamicScope {
   return 'orgAdmin';
 }
 
