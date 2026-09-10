@@ -8,14 +8,18 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.mp-home-screen-wrap {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
 .mp-home-screen-ref {
   display: block;
   width: 100%;
   height: auto;
-  min-height: 100%;
-  object-fit: contain;
-  object-position: top center;
   user-select: none;
+  pointer-events: none;
 }
 
 .mp-home-hotspot {
@@ -25,14 +29,15 @@
   cursor: pointer;
   padding: 0;
   z-index: 2;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* 对齐首页示意图「会议室预约」卡片位置（右下快捷卡片） */
+/* 对齐首页示意图「会议室预约」卡片（393×846 参考图实测约 52% / 38.5%） */
 .mp-home-hotspot-meeting {
-  right: 4%;
-  top: 34%;
+  left: 52%;
+  top: 38.5%;
   width: 44%;
-  height: 14%;
+  height: 8%;
 }
 
 .mp-home-hotspot-meeting:active {

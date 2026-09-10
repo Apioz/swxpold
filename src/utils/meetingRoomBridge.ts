@@ -62,16 +62,18 @@ export function midPlatformRoomToMiniProgramDetail(
   const floorPlanId = inferFloorPlanId(room);
   const planPoint = room.planPoint;
 
+  const equipment = Array.isArray(room.equipment) ? room.equipment : [];
+
   return {
     id: room.id,
-    roomNo: room.roomNo,
-    name: room.name,
+    roomNo: room.roomNo ?? '',
+    name: room.name ?? '',
     building: resolveBuilding(room),
     floor: resolveFloor(room),
-    capacity: room.capacity,
+    capacity: room.capacity ?? 0,
     roomType: '会议室',
-    area: `${room.area}㎡`,
-    facilities: room.equipment.map((item) => equipmentLabelMap[item] ?? item),
+    area: `${room.area ?? 0}㎡`,
+    facilities: equipment.map((item) => equipmentLabelMap[item] ?? item),
     photoUrl: resolvePhotoUrl(room),
     floorPlanId,
     planX: planPoint?.x ?? 0,
